@@ -18,7 +18,13 @@ public class GrabTarget : MonoBehaviour
     [Header("참조")]
     [SerializeField] private Rigidbody targetRigidbody;
 
+    [Header("잡기 설정")]
+    [SerializeField] private bool canBePulled = true;
+    [SerializeField] private bool canPullPlayer = false;
+
     public TargetState CurrentState { get; private set; } = TargetState.Idle;
+    public bool CanBePulled => canBePulled;
+    public bool CanPullPlayer => canPullPlayer;
 
     private Transform currentCapturePoint;
 
@@ -56,7 +62,8 @@ public class GrabTarget : MonoBehaviour
         CurrentState = TargetState.Grabbed;
         currentCapturePoint = null;
 
-        targetRigidbody.isKinematic = false;
+        // 앵커 기둥처럼 고정된 타겟은 잡히더라도 Rigidbody 상태를 움직이지 않게 유지합니다.
+        targetRigidbody.isKinematic = !canBePulled;
         targetRigidbody.useGravity = false;
         targetRigidbody.linearVelocity = Vector3.zero;
         targetRigidbody.angularVelocity = Vector3.zero;
@@ -72,8 +79,8 @@ public class GrabTarget : MonoBehaviour
         CurrentState = TargetState.Released;
         currentCapturePoint = null;
 
-        targetRigidbody.isKinematic = false;
-        targetRigidbody.useGravity = true;
+        targetRigidbody.isKinematic = !canBePulled;
+        targetRigidbody.useGravity = canBePulled;
         targetRigidbody.linearVelocity = Vector3.zero;
         targetRigidbody.angularVelocity = Vector3.zero;
     }
@@ -106,8 +113,8 @@ public class GrabTarget : MonoBehaviour
         CurrentState = TargetState.Released;
         currentCapturePoint = null;
 
-        targetRigidbody.isKinematic = false;
-        targetRigidbody.useGravity = true;
+        targetRigidbody.isKinematic = !canBePulled;
+        targetRigidbody.useGravity = canBePulled;
         targetRigidbody.linearVelocity = Vector3.zero;
         targetRigidbody.angularVelocity = Vector3.zero;
     }
@@ -121,6 +128,13 @@ public class GrabTarget : MonoBehaviour
 
         CurrentState = TargetState.Launched;
         currentCapturePoint = null;
+
+        if (!canBePulled)
+        {
+            targetRigidbody.isKinematic = true;
+            targetRigidbody.useGravity = false;
+            return;
+        }
 
         targetRigidbody.isKinematic = false;
         targetRigidbody.useGravity = true;

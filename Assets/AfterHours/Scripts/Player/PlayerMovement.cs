@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("참조")]
     [SerializeField] private CharacterController characterController;
     [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Animator characterAnimator;
 
     [Header("이동 설정")]
     [SerializeField] private float walkSpeed = 4f;
@@ -39,6 +40,11 @@ public class PlayerMovement : MonoBehaviour
         {
             characterController = GetComponent<CharacterController>();
         }
+
+        if (characterAnimator == null)
+        {
+            characterAnimator = GetComponentInChildren<Animator>();
+        }
     }
 
     private void Update()
@@ -56,8 +62,11 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 moveInput = GetMoveInput();
         Vector3 inputDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        bool isMoving = inputDirection.magnitude >= 0.1f;
 
-        if (inputDirection.magnitude < 0.1f)
+        UpdateAnimation(isMoving);
+
+        if (!isMoving)
         {
             return;
         }
@@ -72,6 +81,17 @@ public class PlayerMovement : MonoBehaviour
         float currentSpeed = IsRunPressed() ? runSpeed : walkSpeed;
 
         characterController.Move(moveDirection.normalized * currentSpeed * Time.deltaTime);
+    }
+
+    private void UpdateAnimation(bool isMoving)
+    {
+        if (characterAnimator == null)
+        {
+            return;
+        }
+
+        // AstronautCharacterController는 AnimationPar 값으로 Idle/Run을 전환합니다.
+        characterAnimator.SetInteger("AnimationPar", isMoving ? 1 : 0);
     }
 
     private void ApplyGravityAndJump()

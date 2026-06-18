@@ -12,8 +12,19 @@ namespace AfterHours.EditorTools
     public static class AfterHoursSceneSetup
     {
         private const string ScenePath = "Assets/AfterHours/Scenes/PlayerMovementTest.unity";
-        private const string AstronautPrefabPath = "Assets/Asset/Stylized_Astronaut/Stylized Astronaut.prefab";
+        private const string AstronautModelPath = "Assets/Asset/Stylized_Astronaut/Character/Astronaut.fbx";
+        private const string AstronautAnimatorControllerPath = "Assets/Asset/Stylized_Astronaut/Character/AstronautCharacterController.controller";
         private const string GrabTargetModelPath = "Assets/Asset/kenney_blocky-characters_20/Models/FBX format/character-g.fbx";
+        private const string GrabPackModelPath = "Assets/Asset/poppy-playtime-grabpack/source/GrabPack Wack A Wuggy/sourse/Grab Pack Rig by D1GQ.fbx";
+        private const string SpaceStationModelRoot = "Assets/Asset/kenney_space-station-kit/Models/FBX format/";
+        private const float OriginalTileSpacing = 2f;
+        private const float FloorTileSpacing = 5f;
+        private const float FloorTileSize = 5f;
+        private const float FloorColliderThickness = 0.35f;
+        private const float WallBlockHeight = 10f;
+        private const float CeilingHeight = 10.2f;
+        private const float LayoutScale = FloorTileSpacing / OriginalTileSpacing;
+        private static readonly Vector3 LargeWallScale = new Vector3(5f, WallBlockHeight, 2.5f);
 
         [MenuItem("After Hours/Setup/Create Player Movement Test Scene")]
         public static void CreatePlayerMovementTestScene()
@@ -21,13 +32,10 @@ namespace AfterHours.EditorTools
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "PlayerMovementTest";
 
-            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.name = "Test Floor";
-            floor.transform.position = Vector3.zero;
-            floor.transform.localScale = new Vector3(2.5f, 1f, 2.5f);
+            CreateEscapeMapLayout();
 
             GameObject player = new GameObject("Player_Astronaut");
-            player.transform.position = new Vector3(0f, 1.05f, 0f);
+            player.transform.position = ScaleMapPosition(new Vector3(0f, 1.05f, -14f));
 
             CharacterController characterController = player.AddComponent<CharacterController>();
             characterController.height = 2f;
@@ -37,19 +45,23 @@ namespace AfterHours.EditorTools
 
             PlayerMovement playerMovement = player.AddComponent<PlayerMovement>();
 
-            GameObject astronautPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(AstronautPrefabPath);
-            if (astronautPrefab == null)
+            GameObject astronautModel = AssetDatabase.LoadAssetAtPath<GameObject>(AstronautModelPath);
+            if (astronautModel == null)
             {
-                Debug.LogError($"Astronaut 프리팹을 찾을 수 없습니다: {AstronautPrefabPath}");
+                Debug.LogError($"Astronaut 모델을 찾을 수 없습니다: {AstronautModelPath}");
                 return;
             }
 
-            GameObject astronaut = (GameObject)PrefabUtility.InstantiatePrefab(astronautPrefab);
+            GameObject astronaut = (GameObject)PrefabUtility.InstantiatePrefab(astronautModel);
             astronaut.name = "Astronaut Visual";
             astronaut.transform.SetParent(player.transform);
             astronaut.transform.localPosition = new Vector3(0f, -1.05f, 0f);
             astronaut.transform.localRotation = Quaternion.identity;
             astronaut.transform.localScale = Vector3.one;
+            ApplyAstronautMaterials(astronaut);
+            AssignAstronautAnimator(astronaut);
+
+            CreateNeckGrabPackVisual(astronaut.transform);
 
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -83,6 +95,7 @@ namespace AfterHours.EditorTools
             SerializedObject serializedMovement = new SerializedObject(playerMovement);
             serializedMovement.FindProperty("characterController").objectReferenceValue = characterController;
             serializedMovement.FindProperty("cameraTransform").objectReferenceValue = cameraObject.transform;
+            serializedMovement.FindProperty("characterAnimator").objectReferenceValue = astronaut.GetComponentInChildren<Animator>();
             serializedMovement.FindProperty("walkSpeed").floatValue = 4f;
             serializedMovement.FindProperty("runSpeed").floatValue = 7f;
             serializedMovement.FindProperty("jumpHeight").floatValue = 1.5f;
@@ -110,14 +123,22 @@ namespace AfterHours.EditorTools
             GameObject player = GameObject.Find("Player_Astronaut");
             GameObject cameraObject = GameObject.Find("Main Camera");
             GameObject visual = GameObject.Find("Astronaut Visual");
+            GameObject grabPackVisual = GameObject.Find("Poppy GrabPack Visual");
             GameObject grabTarget = GameObject.Find("GrabTarget_CharacterG");
             GameObject energyCore = GameObject.Find("EnergyCore_Test");
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             GameObject securityDoor = GameObject.Find("SecurityDoor_Core_Test");
-            GameObject grabMuzzle = GameObject.Find("GrabPack_Muzzle");
-            GameObject grabHoldPoint = GameObject.Find("GrabHoldPoint");
+            GameObject escapeMap = GameObject.Find("EscapeMap_Kenney");
+            GameObject leftGrabMuzzle = GameObject.Find("LeftGrab_Muzzle");
+            GameObject rightGrabMuzzle = GameObject.Find("RightGrab_Muzzle");
+            GameObject leftGrabHoldPoint = GameObject.Find("LeftGrabHoldPoint");
+            GameObject rightGrabHoldPoint = GameObject.Find("RightGrabHoldPoint");
+            GameObject leftGrabArmVisual = FindSceneObjectIncludingInactive("LeftGrab_ArmVisual");
+            GameObject rightGrabArmVisual = FindSceneObjectIncludingInactive("RightGrab_ArmVisual");
+            GameObject leftGrabHandVisual = FindSceneObjectIncludingInactive("LeftGrab_HandVisual");
+            GameObject rightGrabHandVisual = FindSceneObjectIncludingInactive("RightGrab_HandVisual");
 
-            if (player == null || cameraObject == null || visual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || grabMuzzle == null || grabHoldPoint == null)
+            if (player == null || cameraObject == null || visual == null || grabPackVisual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || escapeMap == null || leftGrabMuzzle == null || rightGrabMuzzle == null || leftGrabHoldPoint == null || rightGrabHoldPoint == null || leftGrabArmVisual == null || rightGrabArmVisual == null || leftGrabHandVisual == null || rightGrabHandVisual == null)
             {
                 Debug.LogError("테스트 씬 필수 오브젝트 생성에 실패했습니다.");
                 EditorApplication.Exit(1);
@@ -172,14 +193,368 @@ namespace AfterHours.EditorTools
                 return;
             }
 
-            Debug.Log("PlayerMovement 테스트 씬 검증 완료: Astronaut, CharacterController, PlayerMovement, ThirdPersonCamera, GrabTarget, EnergyCore, CoreStation, SecurityDoor, GrabPackController, Main Camera 연결 확인");
+            Debug.Log("PlayerMovement 테스트 씬 검증 완료: Astronaut, Animator, Poppy GrabPack Visual, Grab Arm Visuals, CharacterController, PlayerMovement, ThirdPersonCamera, GrabTarget, EnergyCore, CoreStation, SecurityDoor, GrabPackController, Main Camera 연결 확인");
             EditorApplication.Exit(0);
+        }
+
+        private static GameObject FindSceneObjectIncludingInactive(string objectName)
+        {
+            GameObject[] objects = Resources.FindObjectsOfTypeAll<GameObject>();
+            foreach (GameObject sceneObject in objects)
+            {
+                if (sceneObject.name == objectName && sceneObject.scene.IsValid())
+                {
+                    return sceneObject;
+                }
+            }
+
+            return null;
+        }
+
+        private static void CreateEscapeMapLayout()
+        {
+            GameObject mapRoot = new GameObject("EscapeMap_Kenney");
+
+            // 레벨링 흐름: 시작실 -> 연습실 -> 긴 복도 -> 코어룸 -> 보안 복도 -> 최종 홀.
+            CreateFloorGrid(mapRoot.transform, "StartRoomFloor", -4, 4, -8, -4, "floor-panel.fbx");
+            CreateFloorGrid(mapRoot.transform, "TrainingRoomFloor", -5, 5, -3, 4, "floor-panel.fbx");
+            CreateFloorGrid(mapRoot.transform, "NarrowCorridorFloor", -1, 1, 5, 15, "floor-panel-straight.fbx");
+            CreateFloorGrid(mapRoot.transform, "CoreLabFloor", -6, 6, 16, 24, "floor-panel.fbx");
+            CreateFloorGrid(mapRoot.transform, "SecurityCorridorFloor", -1, 1, 25, 32, "floor-panel-straight.fbx");
+            CreateFloorGrid(mapRoot.transform, "FinalHallFloor", -7, 7, 33, 43, "floor-panel.fbx");
+
+            // 천장을 추가해 외부 통로가 아니라 폐쇄된 실내 시설처럼 보이게 구성합니다.
+            CreateCeilingGrid(mapRoot.transform, "StartRoomCeiling", -4, 4, -8, -4, "floor-panel.fbx");
+            CreateCeilingGrid(mapRoot.transform, "TrainingRoomCeiling", -5, 5, -3, 4, "floor-panel.fbx");
+            CreateCeilingGrid(mapRoot.transform, "NarrowCorridorCeiling", -1, 1, 5, 15, "floor-panel-straight.fbx");
+            CreateCeilingGrid(mapRoot.transform, "CoreLabCeiling", -6, 6, 16, 24, "floor-panel.fbx");
+            CreateCeilingGrid(mapRoot.transform, "SecurityCorridorCeiling", -1, 1, 25, 32, "floor-panel-straight.fbx");
+            CreateCeilingGrid(mapRoot.transform, "FinalHallCeiling", -7, 7, 33, 43, "floor-panel.fbx");
+
+            // 난이도 확장을 위한 추가 방 5개입니다. 지금은 배치용 빈 공간이고, 이후 퍼즐을 하나씩 넣습니다.
+            CreateLeftSideRoom(mapRoot.transform, "StorageRoom_01", -11, -7, -1, 3);
+            CreateLeftSideRoom(mapRoot.transform, "MaintenanceRoom_02", -10, -3, 9, 13);
+            CreateRightSideRoom(mapRoot.transform, "LabRoom_03", 8, 12, 18, 22);
+            CreateRightSideRoom(mapRoot.transform, "SecurityRoom_04", 3, 7, 26, 30);
+            CreateLeftSideRoom(mapRoot.transform, "FinalPuzzleRoom_05", -13, -9, 35, 40);
+            CreateInlineRoom(mapRoot.transform, "AirlockRoom_06", -5, 5, 44, 48);
+            CreateInlineRoom(mapRoot.transform, "DecontaminationRoom_07", -5, 5, 49, 53);
+            CreateInlineRoom(mapRoot.transform, "EscapeBay_08", -7, 7, 54, 60);
+
+            // 높은 벽을 두 줄로 쌓아 실내 시설처럼 보이게 구성합니다.
+            CreateHighWallRun(mapRoot.transform, -9f, -17f, -7f, true, 6, "Start_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 9f, -17f, -7f, true, 6, "Start_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -8f, -17f, 8f, false, 9, "Start_Back_Wall");
+            CreateHighWallRun(mapRoot.transform, -11f, -7f, 9f, true, 9, "Training_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 11f, -7f, 9f, true, 9, "Training_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -3f, 10f, 30f, true, 11, "Corridor_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 3f, 10f, 30f, true, 11, "Corridor_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -13f, 31f, 49f, true, 10, "CoreLab_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 13f, 31f, 49f, true, 10, "CoreLab_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -3f, 50f, 64f, true, 8, "Security_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 3f, 50f, 64f, true, 8, "Security_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -15f, 65f, 87f, true, 12, "Final_Left_Wall");
+            CreateHighWallRun(mapRoot.transform, 15f, 65f, 87f, true, 12, "Final_Right_Wall");
+            CreateHighWallRun(mapRoot.transform, -14f, 87f, 14f, false, 15, "Final_Exit_Wall");
+
+            PlaceMapModel(mapRoot.transform, "wall-door-wide.fbx", "ExitDoorFrame", new Vector3(0f, 0f, 86f), Vector3.zero, Vector3.one * 2f);
+            PlaceMapModel(mapRoot.transform, "computer-system.fbx", "StartRoom_Console", new Vector3(-5.8f, 0f, -12.5f), new Vector3(0f, 90f, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(mapRoot.transform, "container-wide.fbx", "TrainingRoom_Container_A", new Vector3(6.5f, 0f, -2f), new Vector3(0f, -90f, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(mapRoot.transform, "container-tall.fbx", "TrainingRoom_Container_B", new Vector3(-7f, 0f, 5f), new Vector3(0f, 90f, 0f), Vector3.one * 1.4f);
+            PlaceMapModel(mapRoot.transform, "table-display.fbx", "CoreLab_DisplayTable", new Vector3(7.5f, 0f, 41f), new Vector3(0f, -90f, 0f), Vector3.one * 1.5f);
+            PlaceMapModel(mapRoot.transform, "display-wall-wide.fbx", "CoreLab_StatusDisplay", new Vector3(-11.5f, 1f, 42f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(mapRoot.transform, "pipe.fbx", "LongCorridor_CeilingPipe_A", new Vector3(-2.6f, 3.1f, 20f), new Vector3(0f, 0f, 90f), Vector3.one * 2.5f);
+            PlaceMapModel(mapRoot.transform, "pipe.fbx", "SecurityCorridor_CeilingPipe_B", new Vector3(2.6f, 3.1f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2.5f);
+            PlaceMapModel(mapRoot.transform, "wall-switch.fbx", "ExitWallSwitch_Deco", new Vector3(-2f, 1f, 85.7f), Vector3.zero, Vector3.one * 1.5f);
+
+            // GrabPack 이동 퍼즐용 앵커 기둥입니다. 2초 이상 잡고 있으면 플레이어가 기둥 쪽으로 끌려갑니다.
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Training_Left", new Vector3(-3.5f, 1.8f, -0.5f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Training_Right", new Vector3(3.5f, 1.8f, 3.5f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Corridor_01", new Vector3(0f, 1.8f, 13f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Corridor_02", new Vector3(0f, 1.8f, 23f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_CoreLab_Left", new Vector3(-5f, 1.8f, 38f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_CoreLab_Right", new Vector3(5f, 1.8f, 44f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Security", new Vector3(0f, 1.8f, 58f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_FinalHall", new Vector3(6f, 1.8f, 78f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Airlock", new Vector3(-4f, 1.8f, 94f));
+            CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_EscapeBay", new Vector3(4f, 1.8f, 112f));
+
+            // 모델과 별개로 테스트 플레이용 높은 충돌 경계를 배치합니다.
+            CreateMapCollider(mapRoot.transform, "Start_Left_Blocker", new Vector3(-9.5f, 2.5f, -12f), new Vector3(0.4f, 5f, 10f));
+            CreateMapCollider(mapRoot.transform, "Start_Right_Blocker", new Vector3(9.5f, 2.5f, -12f), new Vector3(0.4f, 5f, 10f));
+            CreateMapCollider(mapRoot.transform, "Start_Back_Blocker", new Vector3(0f, 2.5f, -17.5f), new Vector3(18f, 5f, 0.4f));
+            CreateMapCollider(mapRoot.transform, "Training_Left_Blocker_Back", new Vector3(-11.5f, 2.5f, -5.5f), new Vector3(0.4f, 5f, 3f));
+            CreateMapCollider(mapRoot.transform, "Training_Left_Blocker_Front", new Vector3(-11.5f, 2.5f, 7.5f), new Vector3(0.4f, 5f, 3f));
+            CreateMapCollider(mapRoot.transform, "Training_Right_Blocker", new Vector3(11.5f, 2.5f, 1f), new Vector3(0.4f, 5f, 16f));
+            CreateMapCollider(mapRoot.transform, "Corridor_Left_Blocker_Back", new Vector3(-3.5f, 2.5f, 12.5f), new Vector3(0.4f, 5f, 7f));
+            CreateMapCollider(mapRoot.transform, "Corridor_Left_Blocker_Front", new Vector3(-3.5f, 2.5f, 29f), new Vector3(0.4f, 5f, 4f));
+            CreateMapCollider(mapRoot.transform, "Corridor_Right_Blocker", new Vector3(3.5f, 2.5f, 20f), new Vector3(0.4f, 5f, 22f));
+            CreateMapCollider(mapRoot.transform, "CoreLab_Left_Blocker", new Vector3(-13.5f, 2.5f, 40f), new Vector3(0.4f, 5f, 18f));
+            CreateMapCollider(mapRoot.transform, "CoreLab_Right_Blocker_Back", new Vector3(13.5f, 2.5f, 33.5f), new Vector3(0.4f, 5f, 5f));
+            CreateMapCollider(mapRoot.transform, "CoreLab_Right_Blocker_Front", new Vector3(13.5f, 2.5f, 47f), new Vector3(0.4f, 5f, 4f));
+            CreateMapCollider(mapRoot.transform, "Security_Left_Blocker", new Vector3(-3.5f, 2.5f, 57f), new Vector3(0.4f, 5f, 16f));
+            CreateMapCollider(mapRoot.transform, "Security_Right_Blocker_Back", new Vector3(3.5f, 2.5f, 50f), new Vector3(0.4f, 5f, 2f));
+            CreateMapCollider(mapRoot.transform, "Security_Right_Blocker_Front", new Vector3(3.5f, 2.5f, 63f), new Vector3(0.4f, 5f, 4f));
+            CreateMapCollider(mapRoot.transform, "Final_Left_Blocker_Back", new Vector3(-15.5f, 2.5f, 66.5f), new Vector3(0.4f, 5f, 3f));
+            CreateMapCollider(mapRoot.transform, "Final_Left_Blocker_Front", new Vector3(-15.5f, 2.5f, 83f), new Vector3(0.4f, 5f, 8f));
+            CreateMapCollider(mapRoot.transform, "Final_Right_Blocker", new Vector3(15.5f, 2.5f, 76f), new Vector3(0.4f, 5f, 22f));
+            CreateMapCollider(mapRoot.transform, "Final_Back_Left_Blocker", new Vector3(-8.5f, 2.5f, 87.5f), new Vector3(13f, 5f, 0.4f));
+            CreateMapCollider(mapRoot.transform, "Final_Back_Right_Blocker", new Vector3(8.5f, 2.5f, 87.5f), new Vector3(13f, 5f, 0.4f));
+            CreateMapCollider(mapRoot.transform, "Airlock_Left_Blocker", new Vector3(-11.5f, 5f, 92f), new Vector3(0.4f, 10f, 10f));
+            CreateMapCollider(mapRoot.transform, "Airlock_Right_Blocker", new Vector3(11.5f, 5f, 92f), new Vector3(0.4f, 10f, 10f));
+            CreateMapCollider(mapRoot.transform, "Decontamination_Left_Blocker", new Vector3(-11.5f, 5f, 102f), new Vector3(0.4f, 10f, 10f));
+            CreateMapCollider(mapRoot.transform, "Decontamination_Right_Blocker", new Vector3(11.5f, 5f, 102f), new Vector3(0.4f, 10f, 10f));
+            CreateMapCollider(mapRoot.transform, "EscapeBay_Left_Blocker", new Vector3(-15.5f, 5f, 114f), new Vector3(0.4f, 10f, 14f));
+            CreateMapCollider(mapRoot.transform, "EscapeBay_Right_Blocker", new Vector3(15.5f, 5f, 114f), new Vector3(0.4f, 10f, 14f));
+            CreateMapCollider(mapRoot.transform, "EscapeBay_Back_Blocker", new Vector3(0f, 5f, 121.5f), new Vector3(30f, 10f, 0.4f));
+
+            // 혹시 벽 틈이나 방 연결부에서 빠지는 경우를 막기 위한 보이지 않는 안전 충돌 영역입니다.
+            CreateMapCollider(mapRoot.transform, "MapSafetyFloor", new Vector3(0f, -0.35f, 52f), new Vector3(90f, 0.5f, 150f));
+            CreateMapCollider(mapRoot.transform, "Outer_Left_Blocker", new Vector3(-36f, 5f, 52f), new Vector3(0.4f, 10f, 154f));
+            CreateMapCollider(mapRoot.transform, "Outer_Right_Blocker", new Vector3(36f, 5f, 52f), new Vector3(0.4f, 10f, 154f));
+            CreateMapCollider(mapRoot.transform, "Outer_Back_Blocker", new Vector3(0f, 5f, -25f), new Vector3(72f, 10f, 0.4f));
+            CreateMapCollider(mapRoot.transform, "Outer_Front_Blocker", new Vector3(0f, 5f, 129f), new Vector3(72f, 10f, 0.4f));
+        }
+
+        private static void CreateFloorGrid(Transform parent, string prefix, int xMin, int xMax, int zMin, int zMax, string modelName)
+        {
+            for (int x = xMin; x <= xMax; x++)
+            {
+                for (int z = zMin; z <= zMax; z++)
+                {
+                    PlaceMapModel(parent, modelName, $"{prefix}_{x}_{z}", new Vector3(x * FloorTileSpacing, 0f, z * FloorTileSpacing), Vector3.zero, new Vector3(FloorTileSize, 1f, FloorTileSize));
+                }
+            }
+
+            CreateFloorCollider(parent, $"{prefix}_Collider", xMin, xMax, zMin, zMax);
+        }
+
+        private static void CreateCeilingGrid(Transform parent, string prefix, int xMin, int xMax, int zMin, int zMax, string modelName)
+        {
+            for (int x = xMin; x <= xMax; x++)
+            {
+                for (int z = zMin; z <= zMax; z++)
+                {
+                    PlaceMapModel(parent, modelName, $"{prefix}_{x}_{z}", new Vector3(x * FloorTileSpacing, CeilingHeight, z * FloorTileSpacing), new Vector3(180f, 0f, 0f), new Vector3(FloorTileSize, 1f, FloorTileSize));
+                }
+            }
+        }
+
+        private static void CreateFloorCollider(Transform parent, string objectName, int xMin, int xMax, int zMin, int zMax)
+        {
+            float centerX = (xMin + xMax) * 0.5f * FloorTileSpacing;
+            float centerZ = (zMin + zMax) * 0.5f * FloorTileSpacing;
+            float sizeX = ((xMax - xMin) * FloorTileSpacing) + FloorTileSize;
+            float sizeZ = ((zMax - zMin) * FloorTileSpacing) + FloorTileSize;
+
+            GameObject floorColliderObject = new GameObject(objectName);
+            floorColliderObject.transform.SetParent(parent);
+            floorColliderObject.transform.position = new Vector3(centerX, -FloorColliderThickness * 0.5f, centerZ);
+
+            BoxCollider boxCollider = floorColliderObject.AddComponent<BoxCollider>();
+            boxCollider.size = new Vector3(sizeX, FloorColliderThickness, sizeZ);
+        }
+
+        private static void CreateLeftSideRoom(Transform parent, string roomName, int xMin, int xMax, int zMin, int zMax)
+        {
+            CreateSideRoom(parent, roomName, xMin, xMax, zMin, zMax, true);
+        }
+
+        private static void CreateRightSideRoom(Transform parent, string roomName, int xMin, int xMax, int zMin, int zMax)
+        {
+            CreateSideRoom(parent, roomName, xMin, xMax, zMin, zMax, false);
+        }
+
+        private static void CreateSideRoom(Transform parent, string roomName, int xMin, int xMax, int zMin, int zMax, bool isLeftRoom)
+        {
+            CreateFloorGrid(parent, $"{roomName}_Floor", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+            CreateCeilingGrid(parent, $"{roomName}_Ceiling", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+
+            float leftX = xMin * 2f - 1f;
+            float rightX = xMax * 2f + 1f;
+            float backZ = zMin * 2f - 1f;
+            float frontZ = zMax * 2f + 1f;
+            float centerX = (leftX + rightX) * 0.5f;
+            float centerZ = (backZ + frontZ) * 0.5f;
+            float width = rightX - leftX;
+            float depth = frontZ - backZ;
+
+            CreateHighWallRun(parent, leftX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterLeftWall");
+            CreateHighWallRun(parent, rightX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterRightWall");
+            CreateHighWallRun(parent, leftX, backZ, rightX, false, Mathf.Max(3, xMax - xMin + 2), $"{roomName}_BackWall");
+            CreateHighWallRun(parent, leftX, frontZ, rightX, false, Mathf.Max(3, xMax - xMin + 2), $"{roomName}_FrontWall");
+
+            CreateMapCollider(parent, $"{roomName}_Back_Blocker", new Vector3(centerX, 2.5f, backZ - 0.5f), new Vector3(width, 5f, 0.4f));
+            CreateMapCollider(parent, $"{roomName}_Front_Blocker", new Vector3(centerX, 2.5f, frontZ + 0.5f), new Vector3(width, 5f, 0.4f));
+
+            if (isLeftRoom)
+            {
+                CreateMapCollider(parent, $"{roomName}_Outer_Blocker", new Vector3(leftX - 0.5f, 2.5f, centerZ), new Vector3(0.4f, 5f, depth));
+            }
+            else
+            {
+                CreateMapCollider(parent, $"{roomName}_Outer_Blocker", new Vector3(rightX + 0.5f, 2.5f, centerZ), new Vector3(0.4f, 5f, depth));
+            }
+
+            PlaceRoomDecoration(parent, roomName, new Vector3(centerX, 0f, centerZ), isLeftRoom);
+        }
+
+        private static void CreateInlineRoom(Transform parent, string roomName, int xMin, int xMax, int zMin, int zMax)
+        {
+            CreateFloorGrid(parent, $"{roomName}_Floor", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+            CreateCeilingGrid(parent, $"{roomName}_Ceiling", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+
+            float leftX = xMin * 2f - 1f;
+            float rightX = xMax * 2f + 1f;
+            float backZ = zMin * 2f - 1f;
+            float frontZ = zMax * 2f + 1f;
+            float centerX = (leftX + rightX) * 0.5f;
+            float centerZ = (backZ + frontZ) * 0.5f;
+
+            CreateHighWallRun(parent, leftX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_LeftWall");
+            CreateHighWallRun(parent, rightX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_RightWall");
+
+            // 방과 방 사이가 이어져 보이도록 전후 벽 대신 문 프레임과 장식만 배치합니다.
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{roomName}_EntryFrame", new Vector3(centerX, 0f, backZ), Vector3.zero, Vector3.one * 1.8f);
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{roomName}_ExitFrame", new Vector3(centerX, 0f, frontZ), Vector3.zero, Vector3.one * 1.8f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", $"{roomName}_StatusDisplay", new Vector3(leftX + 0.4f, 1f, centerZ), new Vector3(0f, 90f, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(parent, "container-flat.fbx", $"{roomName}_SupplyCrate", new Vector3(rightX - 2f, 0f, centerZ + 1.5f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+        }
+
+        private static void PlaceRoomDecoration(Transform parent, string roomName, Vector3 center, bool isLeftRoom)
+        {
+            float yRotation = isLeftRoom ? 90f : -90f;
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{roomName}_DoorFrame", center + new Vector3(isLeftRoom ? 4f : -4f, 0f, 0f), new Vector3(0f, yRotation, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(parent, "computer-wide.fbx", $"{roomName}_Terminal", center + new Vector3(isLeftRoom ? -2.5f : 2.5f, 0f, -2.5f), new Vector3(0f, yRotation, 0f), Vector3.one * 1.35f);
+            PlaceMapModel(parent, "container.fbx", $"{roomName}_Container", center + new Vector3(isLeftRoom ? -2.5f : 2.5f, 0f, 2.5f), new Vector3(0f, -yRotation, 0f), Vector3.one * 1.25f);
+        }
+
+        private static void CreateGrabAnchorPillar(Transform parent, string objectName, Vector3 position)
+        {
+            Type grabTargetType = Type.GetType("GrabTarget, Assembly-CSharp");
+            if (grabTargetType == null)
+            {
+                Debug.LogError("GrabTarget 타입을 찾을 수 없어 앵커 기둥을 만들 수 없습니다.");
+                return;
+            }
+
+            GameObject anchorRoot = new GameObject(objectName);
+            anchorRoot.transform.SetParent(parent);
+            anchorRoot.transform.position = ScaleMapPosition(position);
+            anchorRoot.transform.rotation = Quaternion.identity;
+
+            GameObject pillarModel = AssetDatabase.LoadAssetAtPath<GameObject>(SpaceStationModelRoot + "wall-pillar.fbx");
+            if (pillarModel == null)
+            {
+                Debug.LogWarning("앵커 기둥용 wall-pillar.fbx 모델을 찾을 수 없습니다.");
+            }
+
+            GameObject pillarVisual = pillarModel != null ? (GameObject)PrefabUtility.InstantiatePrefab(pillarModel) : null;
+            if (pillarVisual != null)
+            {
+                pillarVisual.name = $"{objectName}_Visual";
+                pillarVisual.transform.SetParent(anchorRoot.transform);
+                pillarVisual.transform.localPosition = Vector3.zero;
+                pillarVisual.transform.localRotation = Quaternion.identity;
+                pillarVisual.transform.localScale = Vector3.one * 2.2f;
+            }
+
+            Rigidbody anchorRigidbody = anchorRoot.AddComponent<Rigidbody>();
+            anchorRigidbody.mass = 1000f;
+            anchorRigidbody.useGravity = false;
+            anchorRigidbody.isKinematic = true;
+
+            CapsuleCollider capsuleCollider = anchorRoot.AddComponent<CapsuleCollider>();
+            capsuleCollider.center = new Vector3(0f, 1.2f, 0f);
+            capsuleCollider.radius = 0.55f;
+            capsuleCollider.height = 2.8f;
+
+            Component grabTarget = anchorRoot.AddComponent(grabTargetType);
+            SerializedObject serializedGrabTarget = new SerializedObject(grabTarget);
+            serializedGrabTarget.FindProperty("targetRigidbody").objectReferenceValue = anchorRigidbody;
+            serializedGrabTarget.FindProperty("canBePulled").boolValue = false;
+            serializedGrabTarget.FindProperty("canPullPlayer").boolValue = true;
+            serializedGrabTarget.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateHighWallRun(Transform parent, float fixedXOrStartX, float startZOrFixedZ, float endZOrEndX, bool vertical, int count, string prefix)
+        {
+            for (int index = 0; index < count; index++)
+            {
+                float t = count <= 1 ? 0f : index / (float)(count - 1);
+                Vector3 position;
+                Vector3 rotation;
+
+                if (vertical)
+                {
+                    float z = Mathf.Lerp(startZOrFixedZ, endZOrEndX, t);
+                    position = new Vector3(fixedXOrStartX, 0f, z);
+                    rotation = new Vector3(0f, fixedXOrStartX < 0f ? 90f : -90f, 0f);
+                }
+                else
+                {
+                    float x = Mathf.Lerp(fixedXOrStartX, endZOrEndX, t);
+                    position = new Vector3(x, 0f, startZOrFixedZ);
+                    rotation = Vector3.zero;
+                }
+
+                PlaceMapModel(parent, "wall.fbx", $"{prefix}_{index}", position, rotation, LargeWallScale);
+            }
+        }
+
+        private static GameObject PlaceMapModel(Transform parent, string modelName, string objectName, Vector3 position, Vector3 eulerAngles, Vector3 scale)
+        {
+            GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(SpaceStationModelRoot + modelName);
+            if (model == null)
+            {
+                Debug.LogWarning($"맵 모델을 찾을 수 없습니다: {modelName}");
+                return null;
+            }
+
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
+            instance.name = objectName;
+            instance.transform.SetParent(parent);
+            instance.transform.position = ShouldKeepGridPosition(objectName) ? position : ScaleMapPosition(position);
+            instance.transform.rotation = Quaternion.Euler(eulerAngles);
+            instance.transform.localScale = scale;
+            return instance;
+        }
+
+        private static void CreateMapCollider(Transform parent, string objectName, Vector3 center, Vector3 size)
+        {
+            bool isWallBlocker = objectName.Contains("Blocker");
+            GameObject colliderObject = new GameObject(objectName);
+            colliderObject.name = objectName;
+            colliderObject.transform.SetParent(parent);
+
+            if (isWallBlocker)
+            {
+                center.y = WallBlockHeight * 0.5f;
+                size.y = Mathf.Max(size.y, WallBlockHeight);
+                size.x = Mathf.Max(size.x, 0.8f);
+                size.z = Mathf.Max(size.z, 0.8f);
+            }
+
+            colliderObject.transform.position = ScaleMapPosition(center);
+
+            BoxCollider boxCollider = colliderObject.AddComponent<BoxCollider>();
+            boxCollider.size = new Vector3(size.x * LayoutScale, size.y, size.z * LayoutScale);
+        }
+
+        private static Vector3 ScaleMapPosition(Vector3 position)
+        {
+            return new Vector3(position.x * LayoutScale, position.y, position.z * LayoutScale);
+        }
+
+        private static bool ShouldKeepGridPosition(string objectName)
+        {
+            return objectName.Contains("Floor_") || objectName.Contains("Ceiling_");
         }
 
         private static void CreateGrabTargetTestObject()
         {
             GameObject targetRoot = new GameObject("GrabTarget_CharacterG");
-            targetRoot.transform.position = new Vector3(2f, 1f, 3f);
+            targetRoot.transform.position = ScaleMapPosition(new Vector3(5f, 1f, -1f));
             targetRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
             Rigidbody targetRigidbody = targetRoot.AddComponent<Rigidbody>();
@@ -219,6 +594,164 @@ namespace AfterHours.EditorTools
             visual.transform.localScale = Vector3.one;
         }
 
+        private static void CreateNeckGrabPackVisual(Transform astronautTransform)
+        {
+            GameObject grabPackModel = AssetDatabase.LoadAssetAtPath<GameObject>(GrabPackModelPath);
+            if (grabPackModel == null)
+            {
+                Debug.LogWarning($"GrabPack 모델을 찾을 수 없습니다: {GrabPackModelPath}");
+                return;
+            }
+
+            Transform attachBone = FindChildRecursive(astronautTransform, "Body_Upper");
+            if (attachBone == null)
+            {
+                attachBone = FindChildRecursive(astronautTransform, "Head");
+            }
+
+            if (attachBone == null)
+            {
+                Debug.LogWarning("GrabPack을 붙일 Astronaut 본을 찾지 못해 Astronaut 루트에 연결합니다.");
+                attachBone = astronautTransform;
+            }
+
+            GameObject mount = new GameObject("NeckGrabPack_Mount");
+            mount.transform.SetParent(attachBone);
+            mount.transform.localPosition = new Vector3(0f, 0.15f, -0.28f);
+            mount.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            mount.transform.localScale = Vector3.one;
+
+            GameObject grabPackVisual = (GameObject)PrefabUtility.InstantiatePrefab(grabPackModel);
+            grabPackVisual.name = "Poppy GrabPack Visual";
+            grabPackVisual.transform.SetParent(mount.transform);
+            grabPackVisual.transform.localPosition = Vector3.zero;
+            grabPackVisual.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            grabPackVisual.transform.localScale = Vector3.one;
+
+            NormalizeVisualSize(grabPackVisual, 0.45f);
+            ApplyGrabPackMaterials(grabPackVisual);
+        }
+
+        private static Transform FindChildRecursive(Transform root, string childName)
+        {
+            if (root.name == childName)
+            {
+                return root;
+            }
+
+            foreach (Transform child in root)
+            {
+                Transform result = FindChildRecursive(child, childName);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        private static void NormalizeVisualSize(GameObject visualRoot, float targetMaxSize)
+        {
+            Renderer[] renderers = visualRoot.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0)
+            {
+                return;
+            }
+
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+
+            float maxSize = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            if (maxSize <= 0.001f)
+            {
+                return;
+            }
+
+            float scaleMultiplier = targetMaxSize / maxSize;
+            visualRoot.transform.localScale *= scaleMultiplier;
+        }
+
+        private static void ApplyAstronautMaterials(GameObject astronaut)
+        {
+            Material suitMaterial = CreateSceneMaterial("Astronaut_Suit_White_URP", new Color(0.92f, 0.94f, 0.9f));
+            Material visorMaterial = CreateSceneMaterial("Astronaut_Visor_Dark_URP", new Color(0.05f, 0.08f, 0.12f));
+            Material accentMaterial = CreateSceneMaterial("Astronaut_Accent_Yellow_URP", new Color(1f, 0.72f, 0.12f));
+
+            Renderer[] renderers = astronaut.GetComponentsInChildren<Renderer>();
+            foreach (Renderer renderer in renderers)
+            {
+                Material[] materials = renderer.sharedMaterials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    string materialName = materials[i] != null ? materials[i].name.ToLowerInvariant() : string.Empty;
+
+                    if (materialName.Contains("yellow"))
+                    {
+                        materials[i] = accentMaterial;
+                    }
+                    else if (materialName.Contains("grey") || materialName.Contains("gray") || materialName.Contains("visor"))
+                    {
+                        materials[i] = visorMaterial;
+                    }
+                    else
+                    {
+                        materials[i] = suitMaterial;
+                    }
+                }
+
+                renderer.sharedMaterials = materials;
+            }
+        }
+
+        private static void AssignAstronautAnimator(GameObject astronaut)
+        {
+            RuntimeAnimatorController animatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(AstronautAnimatorControllerPath);
+            if (animatorController == null)
+            {
+                Debug.LogWarning($"Astronaut 애니메이터 컨트롤러를 찾을 수 없습니다: {AstronautAnimatorControllerPath}");
+                return;
+            }
+
+            Animator animator = astronaut.GetComponentInChildren<Animator>();
+            if (animator == null)
+            {
+                animator = astronaut.AddComponent<Animator>();
+            }
+
+            animator.runtimeAnimatorController = animatorController;
+            animator.applyRootMotion = false;
+        }
+
+        private static void ApplyGrabPackMaterials(GameObject grabPack)
+        {
+            Material bodyMaterial = CreateSceneMaterial("GrabPack_Body_Blue_URP", new Color(0.08f, 0.22f, 0.65f));
+            Material handMaterial = CreateSceneMaterial("GrabPack_Hand_Red_URP", new Color(0.85f, 0.08f, 0.06f));
+            Material darkMaterial = CreateSceneMaterial("GrabPack_Dark_URP", new Color(0.04f, 0.04f, 0.05f));
+
+            Renderer[] renderers = grabPack.GetComponentsInChildren<Renderer>();
+            foreach (Renderer renderer in renderers)
+            {
+                string rendererName = renderer.name.ToLowerInvariant();
+
+                if (rendererName.Contains("hand") || rendererName.Contains("arm"))
+                {
+                    renderer.sharedMaterial = handMaterial;
+                }
+                else if (rendererName.Contains("strap") || rendererName.Contains("black") || rendererName.Contains("dark"))
+                {
+                    renderer.sharedMaterial = darkMaterial;
+                }
+                else
+                {
+                    renderer.sharedMaterial = bodyMaterial;
+                }
+            }
+        }
+
         private static void CreateEnergyCoreTestObject()
         {
             Type grabTargetType = Type.GetType("GrabTarget, Assembly-CSharp");
@@ -231,7 +764,7 @@ namespace AfterHours.EditorTools
 
             GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             core.name = "EnergyCore_Test";
-            core.transform.position = new Vector3(-2f, 1f, 3f);
+            core.transform.position = ScaleMapPosition(new Vector3(-6f, 1f, 39f));
             core.transform.localScale = Vector3.one * 0.7f;
 
             Rigidbody coreRigidbody = core.AddComponent<Rigidbody>();
@@ -302,8 +835,8 @@ namespace AfterHours.EditorTools
 
             GameObject door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "SecurityDoor_Core_Test";
-            door.transform.position = new Vector3(0f, 1.5f, 6f);
-            door.transform.localScale = new Vector3(3f, 3f, 0.25f);
+            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 86f));
+            door.transform.localScale = new Vector3(7.5f, 5f, 0.5f);
             door.GetComponent<Renderer>().sharedMaterial = coreDoorMaterial;
 
             Component securityDoor = door.AddComponent(securityDoorType);
@@ -316,8 +849,8 @@ namespace AfterHours.EditorTools
 
             GameObject station = GameObject.CreatePrimitive(PrimitiveType.Cube);
             station.name = "CoreStation_Test";
-            station.transform.position = new Vector3(-2f, 0.15f, 5f);
-            station.transform.localScale = new Vector3(1.5f, 0.3f, 1.5f);
+            station.transform.position = ScaleMapPosition(new Vector3(-4f, 0.15f, 78f));
+            station.transform.localScale = new Vector3(2.5f, 0.3f, 2.5f);
             station.GetComponent<Renderer>().sharedMaterial = stationMaterial;
 
             BoxCollider stationCollider = station.GetComponent<BoxCollider>();
@@ -370,41 +903,118 @@ namespace AfterHours.EditorTools
                 return;
             }
 
-            GameObject muzzle = new GameObject("GrabPack_Muzzle");
-            muzzle.transform.SetParent(cameraObject.transform);
-            muzzle.transform.localPosition = new Vector3(0.25f, -0.2f, 0.35f);
-            muzzle.transform.localRotation = Quaternion.identity;
+            GameObject leftMuzzle = CreateChildPoint(cameraObject.transform, "LeftGrab_Muzzle", new Vector3(-0.25f, -0.2f, 0.35f));
+            GameObject rightMuzzle = CreateChildPoint(cameraObject.transform, "RightGrab_Muzzle", new Vector3(0.25f, -0.2f, 0.35f));
+            GameObject leftHoldPoint = CreateChildPoint(cameraObject.transform, "LeftGrabHoldPoint", new Vector3(-0.45f, -0.15f, 2.5f));
+            GameObject rightHoldPoint = CreateChildPoint(cameraObject.transform, "RightGrabHoldPoint", new Vector3(0.45f, -0.15f, 2.5f));
 
-            GameObject holdPoint = new GameObject("GrabHoldPoint");
-            holdPoint.transform.SetParent(cameraObject.transform);
-            holdPoint.transform.localPosition = new Vector3(0f, 0f, 2.5f);
-            holdPoint.transform.localRotation = Quaternion.identity;
+            LineRenderer leftLineRenderer = CreateGrabLine(cameraObject.transform, "LeftGrab_Line", Color.cyan, Color.white);
+            LineRenderer rightLineRenderer = CreateGrabLine(cameraObject.transform, "RightGrab_Line", new Color(1f, 0.45f, 0.1f), Color.white);
+            Transform leftArmVisual = CreateGrabArmSegment(cameraObject.transform, "LeftGrab_ArmVisual", new Color(0.1f, 0.35f, 1f));
+            Transform rightArmVisual = CreateGrabArmSegment(cameraObject.transform, "RightGrab_ArmVisual", new Color(1f, 0.12f, 0.08f));
+            Transform leftHandVisual = CreateGrabHandVisual(cameraObject.transform, "LeftGrab_HandVisual", new Color(0.1f, 0.35f, 1f));
+            Transform rightHandVisual = CreateGrabHandVisual(cameraObject.transform, "RightGrab_HandVisual", new Color(1f, 0.12f, 0.08f));
 
-            GameObject lineObject = new GameObject("GrabPack_Line");
-            lineObject.transform.SetParent(cameraObject.transform);
-            lineObject.transform.localPosition = Vector3.zero;
-            lineObject.transform.localRotation = Quaternion.identity;
+            Component grabPackController = player.AddComponent(grabPackControllerType);
+            SerializedObject serializedGrabPack = new SerializedObject(grabPackController);
+            serializedGrabPack.FindProperty("cameraTransform").objectReferenceValue = cameraObject.transform;
+            serializedGrabPack.FindProperty("playerController").objectReferenceValue = player.GetComponent<CharacterController>();
+            serializedGrabPack.FindProperty("leftMuzzleTransform").objectReferenceValue = leftMuzzle.transform;
+            serializedGrabPack.FindProperty("rightMuzzleTransform").objectReferenceValue = rightMuzzle.transform;
+            serializedGrabPack.FindProperty("leftGrabHoldPoint").objectReferenceValue = leftHoldPoint.transform;
+            serializedGrabPack.FindProperty("rightGrabHoldPoint").objectReferenceValue = rightHoldPoint.transform;
+            serializedGrabPack.FindProperty("leftLineRenderer").objectReferenceValue = leftLineRenderer;
+            serializedGrabPack.FindProperty("rightLineRenderer").objectReferenceValue = rightLineRenderer;
+            serializedGrabPack.FindProperty("leftArmVisual").objectReferenceValue = leftArmVisual;
+            serializedGrabPack.FindProperty("rightArmVisual").objectReferenceValue = rightArmVisual;
+            serializedGrabPack.FindProperty("leftHandVisual").objectReferenceValue = leftHandVisual;
+            serializedGrabPack.FindProperty("rightHandVisual").objectReferenceValue = rightHandVisual;
+            serializedGrabPack.FindProperty("grabRange").floatValue = 8f;
+            serializedGrabPack.FindProperty("pullForce").floatValue = 35f;
+            serializedGrabPack.FindProperty("breakDistance").floatValue = 12f;
+            serializedGrabPack.FindProperty("cooldown").floatValue = 0.25f;
+            serializedGrabPack.FindProperty("armExtendSpeed").floatValue = 22f;
+            serializedGrabPack.FindProperty("armRetractSpeed").floatValue = 26f;
+            serializedGrabPack.FindProperty("armRadius").floatValue = 0.06f;
+            serializedGrabPack.FindProperty("handVisualSize").floatValue = 0.22f;
+            serializedGrabPack.FindProperty("enablePlayerPull").boolValue = true;
+            serializedGrabPack.FindProperty("playerPullDelay").floatValue = 2f;
+            serializedGrabPack.FindProperty("playerPullSpeed").floatValue = 8f;
+            serializedGrabPack.FindProperty("playerPullStopDistance").floatValue = 1.5f;
+            serializedGrabPack.ApplyModifiedPropertiesWithoutUndo();
+        }
 
+        private static Transform CreateGrabArmSegment(Transform parent, string objectName, Color color)
+        {
+            GameObject armObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            armObject.name = objectName;
+            armObject.transform.SetParent(parent);
+            armObject.transform.localPosition = Vector3.zero;
+            armObject.transform.localRotation = Quaternion.identity;
+            armObject.transform.localScale = Vector3.one;
+            armObject.SetActive(false);
+
+            Renderer renderer = armObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Material", color);
+            }
+
+            Collider collider = armObject.GetComponent<Collider>();
+            if (collider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(collider);
+            }
+
+            return armObject.transform;
+        }
+
+        private static Transform CreateGrabHandVisual(Transform parent, string objectName, Color color)
+        {
+            GameObject handObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            handObject.name = objectName;
+            handObject.transform.SetParent(parent);
+            handObject.transform.localPosition = Vector3.zero;
+            handObject.transform.localRotation = Quaternion.identity;
+            handObject.transform.localScale = Vector3.one;
+            handObject.SetActive(false);
+
+            Renderer renderer = handObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Material", color);
+            }
+
+            Collider collider = handObject.GetComponent<Collider>();
+            if (collider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(collider);
+            }
+
+            return handObject.transform;
+        }
+
+        private static GameObject CreateChildPoint(Transform parent, string objectName, Vector3 localPosition)
+        {
+            GameObject point = new GameObject(objectName);
+            point.transform.SetParent(parent);
+            point.transform.localPosition = localPosition;
+            point.transform.localRotation = Quaternion.identity;
+            return point;
+        }
+
+        private static LineRenderer CreateGrabLine(Transform parent, string objectName, Color startColor, Color endColor)
+        {
+            GameObject lineObject = CreateChildPoint(parent, objectName, Vector3.zero);
             LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
             lineRenderer.enabled = false;
             lineRenderer.useWorldSpace = true;
             lineRenderer.positionCount = 0;
             lineRenderer.startWidth = 0.04f;
             lineRenderer.endWidth = 0.02f;
-            lineRenderer.startColor = Color.cyan;
-            lineRenderer.endColor = Color.white;
-
-            Component grabPackController = player.AddComponent(grabPackControllerType);
-            SerializedObject serializedGrabPack = new SerializedObject(grabPackController);
-            serializedGrabPack.FindProperty("cameraTransform").objectReferenceValue = cameraObject.transform;
-            serializedGrabPack.FindProperty("muzzleTransform").objectReferenceValue = muzzle.transform;
-            serializedGrabPack.FindProperty("grabHoldPoint").objectReferenceValue = holdPoint.transform;
-            serializedGrabPack.FindProperty("grabRange").floatValue = 8f;
-            serializedGrabPack.FindProperty("pullForce").floatValue = 35f;
-            serializedGrabPack.FindProperty("breakDistance").floatValue = 12f;
-            serializedGrabPack.FindProperty("cooldown").floatValue = 0.25f;
-            serializedGrabPack.FindProperty("lineRenderer").objectReferenceValue = lineRenderer;
-            serializedGrabPack.ApplyModifiedPropertiesWithoutUndo();
+            lineRenderer.startColor = startColor;
+            lineRenderer.endColor = endColor;
+            return lineRenderer;
         }
     }
 }
