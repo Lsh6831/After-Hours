@@ -37,7 +37,7 @@ namespace AfterHours.EditorTools
 
             GameObject player = new GameObject("Player_Astronaut");
             player.tag = "Player";
-            player.transform.position = ScaleMapPosition(new Vector3(0f, 1.05f, -14f));
+            player.transform.position = ScaleMapPosition(new Vector3(0f, 1.05f, -18f));
 
             CharacterController characterController = player.AddComponent<CharacterController>();
             characterController.height = 2f;
@@ -88,6 +88,7 @@ namespace AfterHours.EditorTools
             CreateCoreStationTestObjects();
             CreateGrabPackTestObjects(player, cameraObject);
             CreateMissionGuideObjects();
+            CreateCheckpointRespawnObjects(player);
 
             GameObject lightObject = new GameObject("Directional Light");
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
@@ -134,6 +135,8 @@ namespace AfterHours.EditorTools
             GameObject escapeMap = GameObject.Find("EscapeMap_Kenney");
             GameObject missionManager = GameObject.Find("MissionManager");
             GameObject missionCanvas = GameObject.Find("MissionCanvas");
+            GameObject respawnManager = GameObject.Find("CheckpointRespawnManager");
+            GameObject killZone = GameObject.Find("Map_KillZone");
             GameObject leftGrabMuzzle = GameObject.Find("LeftGrab_Muzzle");
             GameObject rightGrabMuzzle = GameObject.Find("RightGrab_Muzzle");
             GameObject leftGrabHoldPoint = GameObject.Find("LeftGrabHoldPoint");
@@ -143,7 +146,7 @@ namespace AfterHours.EditorTools
             GameObject leftGrabHandVisual = FindSceneObjectIncludingInactive("LeftGrab_HandVisual");
             GameObject rightGrabHandVisual = FindSceneObjectIncludingInactive("RightGrab_HandVisual");
 
-            if (player == null || cameraObject == null || visual == null || grabPackVisual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || escapeMap == null || missionManager == null || missionCanvas == null || leftGrabMuzzle == null || rightGrabMuzzle == null || leftGrabHoldPoint == null || rightGrabHoldPoint == null || leftGrabArmVisual == null || rightGrabArmVisual == null || leftGrabHandVisual == null || rightGrabHandVisual == null)
+            if (player == null || cameraObject == null || visual == null || grabPackVisual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || escapeMap == null || missionManager == null || missionCanvas == null || respawnManager == null || killZone == null || leftGrabMuzzle == null || rightGrabMuzzle == null || leftGrabHoldPoint == null || rightGrabHoldPoint == null || leftGrabArmVisual == null || rightGrabArmVisual == null || leftGrabHandVisual == null || rightGrabHandVisual == null)
             {
                 Debug.LogError("테스트 씬 필수 오브젝트 생성에 실패했습니다.");
                 EditorApplication.Exit(1);
@@ -201,6 +204,13 @@ namespace AfterHours.EditorTools
             if (missionManager.GetComponent<MissionManager>() == null || missionCanvas.GetComponentInChildren<UIManager>() == null)
             {
                 Debug.LogError("미션 안내 UI 또는 MissionManager 생성에 실패했습니다.");
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            if (respawnManager.GetComponent<CheckpointRespawnManager>() == null || killZone.GetComponent<KillZone>() == null)
+            {
+                Debug.LogError("체크포인트 리스폰 시스템 생성에 실패했습니다.");
                 EditorApplication.Exit(1);
                 return;
             }
@@ -1304,6 +1314,122 @@ namespace AfterHours.EditorTools
                 serializedStation.FindProperty("completionObjectiveId").stringValue = "charge_core";
                 serializedStation.ApplyModifiedPropertiesWithoutUndo();
             }
+        }
+
+        private static void CreateCheckpointRespawnObjects(GameObject player)
+        {
+            GameObject canvasObject = GameObject.Find("MissionCanvas");
+            if (canvasObject == null)
+            {
+                Debug.LogError("MissionCanvas를 찾을 수 없어 리스폰 연출 UI를 만들 수 없습니다.");
+                return;
+            }
+
+            GameObject fadeObject = CreateMissionUIRect(canvasObject.transform, "RespawnFadeImage", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            Image fadeImage = fadeObject.AddComponent<Image>();
+            fadeImage.color = new Color(0f, 0f, 0f, 0f);
+            fadeImage.raycastTarget = false;
+            fadeObject.transform.SetAsLastSibling();
+
+            GameObject wakeTextObject = CreateMissionUIRect(canvasObject.transform, "RespawnWakeText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(520f, 70f), Vector2.zero);
+            Text wakeText = CreateMissionText(wakeTextObject, 30, FontStyle.Bold, new Color(0.85f, 0.92f, 1f), TextAnchor.MiddleCenter);
+            wakeText.enabled = false;
+            wakeTextObject.transform.SetAsLastSibling();
+
+            GameObject managerObject = new GameObject("CheckpointRespawnManager");
+            CheckpointRespawnManager respawnManager = managerObject.AddComponent<CheckpointRespawnManager>();
+
+            Transform firstSpawnPoint = CreateSpawnPoint("SpawnPoint_01_CheckIn", new Vector3(0f, 1.05f, -18f), Color.cyan);
+            ConfigureRespawnManager(respawnManager, player, firstSpawnPoint, fadeImage, wakeText);
+
+            CreateCheckpointTrigger("Checkpoint_01_CheckIn", "SpawnPoint_01_CheckIn", new Vector3(0f, 1.05f, -18f), respawnManager, firstSpawnPoint, new Color(0.35f, 0.85f, 1f));
+            CreateCheckpointTrigger("Checkpoint_02_GrabTest", "SpawnPoint_02_GrabTest", new Vector3(0f, 1.05f, 4f), respawnManager, null, new Color(1f, 0.82f, 0.18f));
+            CreateCheckpointTrigger("Checkpoint_03_Storage", "SpawnPoint_03_Storage", new Vector3(0f, 1.05f, 28f), respawnManager, null, new Color(1f, 0.48f, 0.12f));
+            CreateCheckpointTrigger("Checkpoint_04_Anchor", "SpawnPoint_04_Anchor", new Vector3(0f, 1.05f, 52f), respawnManager, null, new Color(0.25f, 1f, 0.45f));
+            CreateCheckpointTrigger("Checkpoint_05_Core", "SpawnPoint_05_Core", new Vector3(0f, 1.05f, 76f), respawnManager, null, new Color(0.12f, 0.48f, 1f));
+            CreateCheckpointTrigger("Checkpoint_06_Security", "SpawnPoint_06_Security", new Vector3(0f, 1.05f, 100f), respawnManager, null, new Color(1f, 0.16f, 0.08f));
+            CreateCheckpointTrigger("Checkpoint_07_Puzzle", "SpawnPoint_07_Puzzle", new Vector3(0f, 1.05f, 124f), respawnManager, null, new Color(1f, 0.25f, 0.65f));
+            CreateCheckpointTrigger("Checkpoint_08_Airlock", "SpawnPoint_08_Airlock", new Vector3(0f, 1.05f, 148f), respawnManager, null, new Color(0.1f, 0.95f, 1f));
+            CreateCheckpointTrigger("Checkpoint_09_Decon", "SpawnPoint_09_Decon", new Vector3(0f, 1.05f, 172f), respawnManager, null, new Color(0.1f, 1f, 0.55f));
+            CreateCheckpointTrigger("Checkpoint_10_Escape", "SpawnPoint_10_Escape", new Vector3(0f, 1.05f, 196f), respawnManager, null, new Color(0.96f, 0.98f, 1f));
+
+            CreateKillZone(respawnManager);
+        }
+
+        private static void ConfigureRespawnManager(CheckpointRespawnManager respawnManager, GameObject player, Transform firstSpawnPoint, Image fadeImage, Text wakeText)
+        {
+            SerializedObject serializedRespawnManager = new SerializedObject(respawnManager);
+            serializedRespawnManager.FindProperty("playerTransform").objectReferenceValue = player.transform;
+            serializedRespawnManager.FindProperty("playerController").objectReferenceValue = player.GetComponent<CharacterController>();
+            serializedRespawnManager.FindProperty("playerMovement").objectReferenceValue = player.GetComponent<PlayerMovement>();
+            serializedRespawnManager.FindProperty("fadeImage").objectReferenceValue = fadeImage;
+            serializedRespawnManager.FindProperty("wakeUpText").objectReferenceValue = wakeText;
+            serializedRespawnManager.FindProperty("startingSpawnPoint").objectReferenceValue = firstSpawnPoint;
+            serializedRespawnManager.FindProperty("fadeOutDuration").floatValue = 0.45f;
+            serializedRespawnManager.FindProperty("sleepDuration").floatValue = 0.65f;
+            serializedRespawnManager.FindProperty("fadeInDuration").floatValue = 1.15f;
+            serializedRespawnManager.FindProperty("wakeUpMessage").stringValue = "눈을 뜨는 중...";
+            serializedRespawnManager.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateCheckpointTrigger(string checkpointName, string spawnPointName, Vector3 position, CheckpointRespawnManager respawnManager, Transform existingSpawnPoint, Color color)
+        {
+            Transform spawnPoint = existingSpawnPoint != null ? existingSpawnPoint : CreateSpawnPoint(spawnPointName, position, color);
+
+            GameObject triggerObject = new GameObject(checkpointName);
+            triggerObject.transform.position = ScaleMapPosition(position);
+
+            BoxCollider triggerCollider = triggerObject.AddComponent<BoxCollider>();
+            triggerCollider.isTrigger = true;
+            triggerCollider.size = new Vector3(7f * LayoutScale, 3f, 5f * LayoutScale);
+
+            CheckpointTrigger checkpointTrigger = triggerObject.AddComponent<CheckpointTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(checkpointTrigger);
+            serializedTrigger.FindProperty("respawnManager").objectReferenceValue = respawnManager;
+            serializedTrigger.FindProperty("spawnPoint").objectReferenceValue = spawnPoint;
+            serializedTrigger.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static Transform CreateSpawnPoint(string objectName, Vector3 position, Color color)
+        {
+            GameObject spawnPoint = new GameObject(objectName);
+            spawnPoint.transform.position = ScaleMapPosition(position);
+            spawnPoint.transform.rotation = Quaternion.identity;
+
+            GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            marker.name = $"{objectName}_Marker";
+            marker.transform.SetParent(spawnPoint.transform);
+            marker.transform.localPosition = new Vector3(0f, -0.95f, 0f);
+            marker.transform.localScale = new Vector3(1.4f, 0.05f, 1.4f);
+
+            Renderer renderer = marker.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Marker_Material", color);
+            }
+
+            Collider markerCollider = marker.GetComponent<Collider>();
+            if (markerCollider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(markerCollider);
+            }
+
+            return spawnPoint.transform;
+        }
+
+        private static void CreateKillZone(CheckpointRespawnManager respawnManager)
+        {
+            GameObject killZoneObject = new GameObject("Map_KillZone");
+            killZoneObject.transform.position = ScaleMapPosition(new Vector3(0f, -8f, 94f));
+
+            BoxCollider killZoneCollider = killZoneObject.AddComponent<BoxCollider>();
+            killZoneCollider.isTrigger = true;
+            killZoneCollider.size = new Vector3(70f * LayoutScale, 4f, 260f * LayoutScale);
+
+            KillZone killZone = killZoneObject.AddComponent<KillZone>();
+            SerializedObject serializedKillZone = new SerializedObject(killZone);
+            serializedKillZone.FindProperty("respawnManager").objectReferenceValue = respawnManager;
+            serializedKillZone.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static GameObject CreateMissionUIRect(Transform parent, string objectName, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 sizeDelta, Vector2 anchoredPosition)

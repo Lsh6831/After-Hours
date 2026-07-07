@@ -171,4 +171,10 @@ public class PlayerMovement : MonoBehaviour
         return Input.GetKeyDown(KeyCode.Space);
 #endif
     }
+
+    public void ResetVerticalVelocity()
+    {
+        // 체크포인트로 되돌아온 직후 이전 낙하 속도가 남지 않도록 초기화합니다.
+        verticalVelocity = -2f;
+    }
 }
