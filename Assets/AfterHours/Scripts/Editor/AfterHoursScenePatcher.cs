@@ -35,6 +35,7 @@ namespace AfterHours.EditorTools
             ConfigureMissionSteps(missionManager);
             ConfigureExistingMissionTriggers(missionManager);
             ConfigureAreaLabels();
+            ConfigureQuestObjectPositions();
             ConfigureGrabPackPickup(missionManager);
             ConfigureCoreStation("CoreStation_Test", missionManager, "swap_battery_01");
             ConfigureMissionDoors(patchRoot, missionManager);
@@ -101,16 +102,16 @@ namespace AfterHours.EditorTools
 
         private static void ConfigureAreaLabels()
         {
-            SetTextMeshLabel("Room01_CheckIn_Label", "01 퇴근 점검 시작\n컴퓨터 확인");
-            SetTextMeshLabel("Room02_GrabPractice_Label", "02 그랩 장비 획득\n장비에 닿아 좌/우클릭 해금");
-            SetTextMeshLabel("Room03_Storage_Label", "03 스토리지 확인\n왼쪽 점프 구간");
-            SetTextMeshLabel("Room04_AnchorShaft_Label", "04 앵커 사용\n잡고 끌려가기");
-            SetTextMeshLabel("Room05_CoreLab_Label", "05 배터리 교체\n푸른 코어 투입");
-            SetTextMeshLabel("Room06_SecurityGate_Label", "06 신호등 점검\n불 꺼질 때 통과");
-            SetTextMeshLabel("Room07_PuzzleCell_Label", "07 배터리 교체 2\n코어와 앵커 동시 활용");
-            SetTextMeshLabel("Room08_Airlock_Label", "08 직원 퇴근 시키기\n로봇을 창문 밖으로");
-            SetTextMeshLabel("Room09_Decon_Label", "09 종합 점검\n라이트 + 점프 + 그랩");
-            SetTextMeshLabel("Room10_EscapeBay_Label", "10 퇴근 완료\n점검완 찍기");
+            SetTextMeshLabel("Room01_CheckIn_Label", "01 CHECK-IN\nPC 점검");
+            SetTextMeshLabel("Room02_GrabPractice_Label", "02 STORAGE\n좌측 점프");
+            SetTextMeshLabel("Room03_Storage_Label", "03 GRAB PACK\n장비 착용");
+            SetTextMeshLabel("Room04_AnchorShaft_Label", "04 ANCHOR\n2초 고정");
+            SetTextMeshLabel("Room05_CoreLab_Label", "05 POWER\n코어 교체");
+            SetTextMeshLabel("Room06_SecurityGate_Label", "06 SIGNAL\n소등 통과");
+            SetTextMeshLabel("Room07_PuzzleCell_Label", "07 BATTERY\n코어 + 앵커");
+            SetTextMeshLabel("Room08_Airlock_Label", "08 ROBOT\n퇴근 처리");
+            SetTextMeshLabel("Room09_Decon_Label", "09 FINAL\n종합 점검");
+            SetTextMeshLabel("Room10_EscapeBay_Label", "10 CLOCK OUT\n점검완");
         }
 
         private static void SetTextMeshLabel(string objectName, string labelText)
@@ -124,6 +125,48 @@ namespace AfterHours.EditorTools
             }
 
             textMesh.text = labelText;
+        }
+
+        private static void ConfigureQuestObjectPositions()
+        {
+            // 02번 미션은 왼쪽 점프 동선 끝에서 스토리지를 확인하게 배치합니다.
+            SetWorldPosition("MissionTrigger_StorageCratePad", new Vector3(-13.5f, 1.2f, 38f));
+            SetWorldPosition("Room03_Storage_Container_A", new Vector3(-13.5f, 0f, 33f));
+            SetWorldPosition("Room03_Storage_Container_B", new Vector3(-16.5f, 0f, 42f));
+
+            // 03번 미션은 장비를 실제로 밟고 지나가며 획득한 뒤, 앞의 테스트 타겟을 잡게 만듭니다.
+            SetWorldPosition("Grab Pack Rig by D1GQ", new Vector3(0f, 1.1f, 82f));
+            SetWorldPosition("MissionTrigger_GrabTargetPad", new Vector3(0f, 1.2f, 101f));
+            SetWorldPosition("GrabTarget_TestDummy", new Vector3(0f, 1.1f, 108f));
+            SetWorldPosition("GrabTarget_Test", new Vector3(0f, 1.1f, 108f));
+
+            // 05번 코어 교체는 코어와 스테이션을 한눈에 보이도록 좌우로 벌립니다.
+            SetWorldPosition("EnergyCore_Test", new Vector3(-10f, 1.15f, 205f));
+            SetWorldPosition("CoreStation_Test", new Vector3(10f, 0.15f, 205f));
+
+            // 06번 신호등은 방 중앙 통로를 가로막도록 정렬합니다.
+            SetWorldPosition("ClockOut_SignalLightGate", new Vector3(0f, 1.5f, 265f));
+            SetWorldPosition("ClockOut_SignalLight_BlinkingBar", new Vector3(0f, 9.7f, 265f));
+            SetWorldPosition("ClockOut_SignalLight_PointLight", new Vector3(0f, 8.9f, 265f));
+
+            // 07번 두 번째 배터리는 코어와 스테이션을 대각선으로 배치해 앵커 활용 의도를 보이게 합니다.
+            SetWorldPosition("ClockOut_EnergyCore_TrapRoom", new Vector3(-13f, 1.1f, 325f));
+            SetWorldPosition("ClockOut_CoreStation_TrapRoom", new Vector3(13f, 0.15f, 338f));
+
+            // 08번 로봇은 왼쪽, 처리 창문은 오른쪽으로 배치해 던지는 방향을 명확히 합니다.
+            SetWorldPosition("ClockOut_Overtime_Robot", new Vector3(-12f, 1f, 385f));
+            SetWorldPosition("ClockOut_RobotCheckout_WindowTrigger", new Vector3(18f, 1.5f, 385f));
+        }
+
+        private static void SetWorldPosition(string objectName, Vector3 position)
+        {
+            GameObject targetObject = GameObject.Find(objectName);
+            if (targetObject == null)
+            {
+                return;
+            }
+
+            targetObject.transform.position = position;
         }
 
         private static void ConfigureGrabPackPickup(MissionManager missionManager)
