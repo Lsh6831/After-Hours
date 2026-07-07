@@ -12,9 +12,11 @@ public class CoreStation : MonoBehaviour
     [SerializeField] private SecurityDoor linkedDoor;
     [SerializeField] private ParticleSystem chargeParticles;
     [SerializeField] private AudioSource chargeAudio;
+    [SerializeField] private MissionManager missionManager;
 
     [Header("충전 설정")]
     [SerializeField] private float chargeTime = 3f;
+    [SerializeField] private string completionObjectiveId = "charge_core";
 
     private bool isCharging;
     private bool isCharged;
@@ -105,6 +107,11 @@ public class CoreStation : MonoBehaviour
         if (linkedDoor != null)
         {
             linkedDoor.OpenDoor();
+        }
+
+        if (missionManager != null)
+        {
+            missionManager.CompleteMission(completionObjectiveId);
         }
     }
 }

@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using System;
 
 namespace AfterHours.EditorTools
@@ -35,6 +36,7 @@ namespace AfterHours.EditorTools
             CreateEscapeMapLayout();
 
             GameObject player = new GameObject("Player_Astronaut");
+            player.tag = "Player";
             player.transform.position = ScaleMapPosition(new Vector3(0f, 1.05f, -14f));
 
             CharacterController characterController = player.AddComponent<CharacterController>();
@@ -85,6 +87,7 @@ namespace AfterHours.EditorTools
             CreateEnergyCoreTestObject();
             CreateCoreStationTestObjects();
             CreateGrabPackTestObjects(player, cameraObject);
+            CreateMissionGuideObjects();
 
             GameObject lightObject = new GameObject("Directional Light");
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
@@ -129,6 +132,8 @@ namespace AfterHours.EditorTools
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             GameObject securityDoor = GameObject.Find("SecurityDoor_Core_Test");
             GameObject escapeMap = GameObject.Find("EscapeMap_Kenney");
+            GameObject missionManager = GameObject.Find("MissionManager");
+            GameObject missionCanvas = GameObject.Find("MissionCanvas");
             GameObject leftGrabMuzzle = GameObject.Find("LeftGrab_Muzzle");
             GameObject rightGrabMuzzle = GameObject.Find("RightGrab_Muzzle");
             GameObject leftGrabHoldPoint = GameObject.Find("LeftGrabHoldPoint");
@@ -138,7 +143,7 @@ namespace AfterHours.EditorTools
             GameObject leftGrabHandVisual = FindSceneObjectIncludingInactive("LeftGrab_HandVisual");
             GameObject rightGrabHandVisual = FindSceneObjectIncludingInactive("RightGrab_HandVisual");
 
-            if (player == null || cameraObject == null || visual == null || grabPackVisual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || escapeMap == null || leftGrabMuzzle == null || rightGrabMuzzle == null || leftGrabHoldPoint == null || rightGrabHoldPoint == null || leftGrabArmVisual == null || rightGrabArmVisual == null || leftGrabHandVisual == null || rightGrabHandVisual == null)
+            if (player == null || cameraObject == null || visual == null || grabPackVisual == null || grabTarget == null || energyCore == null || coreStation == null || securityDoor == null || escapeMap == null || missionManager == null || missionCanvas == null || leftGrabMuzzle == null || rightGrabMuzzle == null || leftGrabHoldPoint == null || rightGrabHoldPoint == null || leftGrabArmVisual == null || rightGrabArmVisual == null || leftGrabHandVisual == null || rightGrabHandVisual == null)
             {
                 Debug.LogError("테스트 씬 필수 오브젝트 생성에 실패했습니다.");
                 EditorApplication.Exit(1);
@@ -193,7 +198,14 @@ namespace AfterHours.EditorTools
                 return;
             }
 
-            Debug.Log("PlayerMovement 테스트 씬 검증 완료: Astronaut, Animator, Poppy GrabPack Visual, Grab Arm Visuals, CharacterController, PlayerMovement, ThirdPersonCamera, GrabTarget, EnergyCore, CoreStation, SecurityDoor, GrabPackController, Main Camera 연결 확인");
+            if (missionManager.GetComponent<MissionManager>() == null || missionCanvas.GetComponentInChildren<UIManager>() == null)
+            {
+                Debug.LogError("미션 안내 UI 또는 MissionManager 생성에 실패했습니다.");
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            Debug.Log("PlayerMovement 테스트 씬 검증 완료: Astronaut, Animator, Poppy GrabPack Visual, Grab Arm Visuals, CharacterController, PlayerMovement, ThirdPersonCamera, GrabTarget, EnergyCore, CoreStation, SecurityDoor, GrabPackController, Mission UI, Main Camera 연결 확인");
             EditorApplication.Exit(0);
         }
 
@@ -1033,6 +1045,147 @@ namespace AfterHours.EditorTools
             serializedStation.FindProperty("linkedDoor").objectReferenceValue = securityDoor;
             serializedStation.FindProperty("chargeTime").floatValue = 3f;
             serializedStation.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateMissionGuideObjects()
+        {
+            GameObject canvasObject = new GameObject("MissionCanvas");
+            Canvas canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10;
+
+            CanvasScaler canvasScaler = canvasObject.AddComponent<CanvasScaler>();
+            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasScaler.referenceResolution = new Vector2(1920f, 1080f);
+            canvasScaler.matchWidthOrHeight = 0.5f;
+
+            canvasObject.AddComponent<GraphicRaycaster>();
+
+            GameObject panelObject = CreateMissionUIRect(canvasObject.transform, "ObjectivePanel", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(980f, 142f), new Vector2(0f, 54f));
+            Image panelImage = panelObject.AddComponent<Image>();
+            panelImage.color = new Color(0.03f, 0.04f, 0.055f, 0.86f);
+
+            GameObject statusObject = CreateMissionUIRect(panelObject.transform, "ObjectiveStatusText", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(170f, 28f), new Vector2(26f, -20f));
+            Text statusText = CreateMissionText(statusObject, 18, FontStyle.Bold, new Color(0.35f, 0.9f, 1f), TextAnchor.MiddleLeft);
+
+            GameObject titleObject = CreateMissionUIRect(panelObject.transform, "ObjectiveTitleText", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(-220f, 38f), new Vector2(94f, -48f));
+            Text titleText = CreateMissionText(titleObject, 28, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
+
+            GameObject descriptionObject = CreateMissionUIRect(panelObject.transform, "ObjectiveDescriptionText", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(-72f, 54f), new Vector2(0f, 30f));
+            Text descriptionText = CreateMissionText(descriptionObject, 22, FontStyle.Normal, new Color(0.86f, 0.9f, 0.95f), TextAnchor.UpperLeft);
+
+            UIManager uiManager = canvasObject.AddComponent<UIManager>();
+            SerializedObject serializedUi = new SerializedObject(uiManager);
+            serializedUi.FindProperty("objectivePanel").objectReferenceValue = panelObject;
+            serializedUi.FindProperty("objectiveTitleText").objectReferenceValue = titleText;
+            serializedUi.FindProperty("objectiveDescriptionText").objectReferenceValue = descriptionText;
+            serializedUi.FindProperty("objectiveStatusText").objectReferenceValue = statusText;
+            serializedUi.FindProperty("completedStatusText").stringValue = "완료";
+            serializedUi.FindProperty("activeStatusText").stringValue = "현재 목표";
+            serializedUi.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject missionObject = new GameObject("MissionManager");
+            MissionManager missionManager = missionObject.AddComponent<MissionManager>();
+            SerializedObject serializedMission = new SerializedObject(missionManager);
+            serializedMission.FindProperty("uiManager").objectReferenceValue = uiManager;
+            serializedMission.FindProperty("nextMissionDelay").floatValue = 1.5f;
+            ConfigureMissionSteps(serializedMission.FindProperty("missionSteps"));
+            serializedMission.ApplyModifiedPropertiesWithoutUndo();
+
+            CreateMissionTrigger("MissionTrigger_ReachTraining", "reach_training", missionManager, new Vector3(0f, 1.5f, 1f), new Vector3(22f, 3f, 16f));
+            CreateMissionTrigger("MissionTrigger_ReachStorage", "reach_storage", missionManager, new Vector3(-18f, 1.5f, 2f), new Vector3(10f, 3f, 10f));
+            CreateMissionTrigger("MissionTrigger_ReachCoreLab", "reach_core_lab", missionManager, new Vector3(0f, 1.5f, 40f), new Vector3(26f, 3f, 18f));
+            CreateMissionTrigger("MissionTrigger_ReachSecurity", "reach_security", missionManager, new Vector3(10f, 1.5f, 56f), new Vector3(10f, 3f, 10f));
+            CreateMissionTrigger("MissionTrigger_ReachPuzzle", "reach_puzzle", missionManager, new Vector3(-22f, 1.5f, 75f), new Vector3(10f, 3f, 13f));
+            CreateMissionTrigger("MissionTrigger_ReachAirlock", "reach_airlock", missionManager, new Vector3(0f, 1.5f, 92f), new Vector3(22f, 3f, 10f));
+            CreateMissionTrigger("MissionTrigger_ReachEscape", "reach_escape", missionManager, new Vector3(0f, 1.5f, 114f), new Vector3(30f, 3f, 14f));
+
+            GameObject coreStation = GameObject.Find("CoreStation_Test");
+            CoreStation station = coreStation != null ? coreStation.GetComponent<CoreStation>() : null;
+            if (station != null)
+            {
+                SerializedObject serializedStation = new SerializedObject(station);
+                serializedStation.FindProperty("missionManager").objectReferenceValue = missionManager;
+                serializedStation.FindProperty("completionObjectiveId").stringValue = "charge_core";
+                serializedStation.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+
+        private static GameObject CreateMissionUIRect(Transform parent, string objectName, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 sizeDelta, Vector2 anchoredPosition)
+        {
+            GameObject uiObject = new GameObject(objectName);
+            uiObject.transform.SetParent(parent);
+
+            RectTransform rectTransform = uiObject.AddComponent<RectTransform>();
+            rectTransform.anchorMin = anchorMin;
+            rectTransform.anchorMax = anchorMax;
+            rectTransform.pivot = pivot;
+            rectTransform.sizeDelta = sizeDelta;
+            rectTransform.anchoredPosition = anchoredPosition;
+            rectTransform.localScale = Vector3.one;
+
+            return uiObject;
+        }
+
+        private static Text CreateMissionText(GameObject textObject, int fontSize, FontStyle fontStyle, Color color, TextAnchor alignment)
+        {
+            Text text = textObject.AddComponent<Text>();
+            text.font = Font.CreateDynamicFontFromOSFont("Malgun Gothic", fontSize);
+            if (text.font == null)
+            {
+                text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            }
+
+            text.fontSize = fontSize;
+            text.fontStyle = fontStyle;
+            text.color = color;
+            text.alignment = alignment;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.raycastTarget = false;
+            return text;
+        }
+
+        private static void ConfigureMissionSteps(SerializedProperty missionSteps)
+        {
+            string[,] data =
+            {
+                { "reach_training", "훈련 구역으로 이동", "노란색 TRAINING 구역으로 이동해 Grab Pack 조작을 시작하세요.", "훈련 구역에 도착했습니다." },
+                { "reach_storage", "보관실 확인", "주황색 STORAGE 구역으로 이동해 잡을 수 있는 물체와 통로 구조를 확인하세요.", "보관실을 확인했습니다." },
+                { "reach_core_lab", "코어 연구실 진입", "파란색 CORE LAB 구역으로 이동해 Energy Core와 Core Station을 찾으세요.", "코어 연구실에 진입했습니다." },
+                { "charge_core", "Energy Core 충전", "파란 Energy Core를 Grab Pack으로 끌어 Core Station 위에 올리세요.", "Core Station 충전 완료. 보안문이 열렸습니다." },
+                { "reach_security", "보안 구역 통과", "붉은 SECURITY 구역으로 이동해 열린 보안문 너머의 경로를 확인하세요.", "보안 구역을 통과했습니다." },
+                { "reach_puzzle", "최종 퍼즐실 진입", "분홍색 PUZZLE 구역으로 이동해 마지막 Grab Pack 이동 구간을 준비하세요.", "최종 퍼즐실에 도착했습니다." },
+                { "reach_airlock", "Airlock 진입", "청록색 AIRLOCK 구역으로 이동해 탈출 절차를 시작하세요.", "Airlock에 진입했습니다." },
+                { "reach_escape", "Escape Bay 도착", "밝은 ESCAPE 구역까지 이동해 시설을 빠져나가세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
+            };
+
+            missionSteps.arraySize = data.GetLength(0);
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                SerializedProperty step = missionSteps.GetArrayElementAtIndex(i);
+                step.FindPropertyRelative("objectiveId").stringValue = data[i, 0];
+                step.FindPropertyRelative("title").stringValue = data[i, 1];
+                step.FindPropertyRelative("description").stringValue = data[i, 2];
+                step.FindPropertyRelative("completionMessage").stringValue = data[i, 3];
+            }
+        }
+
+        private static void CreateMissionTrigger(string objectName, string objectiveId, MissionManager missionManager, Vector3 center, Vector3 size)
+        {
+            GameObject triggerObject = new GameObject(objectName);
+            triggerObject.transform.position = ScaleMapPosition(center);
+
+            BoxCollider boxCollider = triggerObject.AddComponent<BoxCollider>();
+            boxCollider.isTrigger = true;
+            boxCollider.size = new Vector3(size.x * LayoutScale, size.y, size.z * LayoutScale);
+
+            MissionObjectiveTrigger trigger = triggerObject.AddComponent<MissionObjectiveTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedTrigger.FindProperty("objectiveId").stringValue = objectiveId;
+            serializedTrigger.FindProperty("triggerOnce").boolValue = true;
+            serializedTrigger.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static Material CreateSceneMaterial(string materialName, Color color)
