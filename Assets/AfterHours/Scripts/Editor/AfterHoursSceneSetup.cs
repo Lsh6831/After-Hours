@@ -241,6 +241,16 @@ namespace AfterHours.EditorTools
             CreateInlineRoom(mapRoot.transform, "DecontaminationRoom_07", -5, 5, 49, 53);
             CreateInlineRoom(mapRoot.transform, "EscapeBay_08", -7, 7, 54, 60);
 
+            // 레벨링 동선: 각 방을 하나의 흐름으로 이어주는 연결 복도입니다.
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Training_To_Storage", -6, -5, 0, 2);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Storage_To_Maintenance", -9, -7, 4, 8);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Maintenance_To_Main", -2, -1, 10, 13);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_CoreLab_To_Lab", 7, 8, 19, 22);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Lab_To_SecurityRoom", 5, 7, 23, 25);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_SecurityRoom_To_Main", 1, 3, 27, 30);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Final_To_Puzzle", -8, -7, 36, 40);
+            CreateConnectorCorridor(mapRoot.transform, "Connector_Puzzle_To_Airlock", -8, -5, 41, 44);
+
             // 높은 벽을 두 줄로 쌓아 실내 시설처럼 보이게 구성합니다.
             CreateHighWallRun(mapRoot.transform, -9f, -17f, -7f, true, 6, "Start_Left_Wall");
             CreateHighWallRun(mapRoot.transform, 9f, -17f, -7f, true, 6, "Start_Right_Wall");
@@ -379,8 +389,16 @@ namespace AfterHours.EditorTools
             float width = rightX - leftX;
             float depth = frontZ - backZ;
 
-            CreateHighWallRun(parent, leftX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterLeftWall");
-            CreateHighWallRun(parent, rightX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterRightWall");
+            // 메인 동선과 이어지는 안쪽 벽은 열어두고, 바깥쪽 벽만 막아 방 입구가 자연스럽게 보이게 합니다.
+            if (isLeftRoom)
+            {
+                CreateHighWallRun(parent, leftX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterLeftWall");
+            }
+            else
+            {
+                CreateHighWallRun(parent, rightX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_OuterRightWall");
+            }
+
             CreateHighWallRun(parent, leftX, backZ, rightX, false, Mathf.Max(3, xMax - xMin + 2), $"{roomName}_BackWall");
             CreateHighWallRun(parent, leftX, frontZ, rightX, false, Mathf.Max(3, xMax - xMin + 2), $"{roomName}_FrontWall");
 
@@ -397,6 +415,20 @@ namespace AfterHours.EditorTools
             }
 
             PlaceRoomDecoration(parent, roomName, new Vector3(centerX, 0f, centerZ), isLeftRoom);
+        }
+
+        private static void CreateConnectorCorridor(Transform parent, string corridorName, int xMin, int xMax, int zMin, int zMax)
+        {
+            CreateFloorGrid(parent, $"{corridorName}_Floor", xMin, xMax, zMin, zMax, "floor-panel-straight.fbx");
+            CreateCeilingGrid(parent, $"{corridorName}_Ceiling", xMin, xMax, zMin, zMax, "floor-panel-straight.fbx");
+
+            float centerX = (xMin + xMax) * 0.5f * OriginalTileSpacing;
+            float centerZ = (zMin + zMax) * 0.5f * OriginalTileSpacing;
+            bool horizontal = (xMax - xMin) >= (zMax - zMin);
+
+            // 연결 지점을 눈으로 알아보기 쉽도록 문 프레임을 얹습니다.
+            Vector3 doorRotation = horizontal ? new Vector3(0f, 90f, 0f) : Vector3.zero;
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{corridorName}_EntryFrame", new Vector3(centerX, 0f, centerZ), doorRotation, Vector3.one * 1.4f);
         }
 
         private static void CreateInlineRoom(Transform parent, string roomName, int xMin, int xMax, int zMin, int zMax)
