@@ -362,13 +362,15 @@ namespace AfterHours.EditorTools
             CreateCompactRoom(mapRoot, "Room10_EscapeBay", "10 ESCAPE", -2, 2, 19, 21, new Color(0.96f, 0.98f, 1f));
 
             PlaceCompactRoomProps(mapRoot);
+            PlaceCompactDoorSequence(mapRoot);
 
             // GrabPack 이동 퍼즐용 앵커입니다. 움직일 수 없는 기둥이라 플레이어가 끌려갑니다.
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-2.8f, 1.8f, -8f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(2.8f, 1.8f, -6f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Shaft_A", new Vector3(0f, 1.8f, 4f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-2.5f, 1.8f, 22f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(2.5f, 1.8f, 26f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Security_Exit", new Vector3(0f, 1.8f, 18f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-3.1f, 1.8f, 22f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(3.1f, 1.8f, 26f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Airlock_A", new Vector3(0f, 1.8f, 30f));
 
             // 방 전체를 감싸는 보이지 않는 안전 경계입니다.
@@ -424,10 +426,65 @@ namespace AfterHours.EditorTools
 
             PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-3.4f, 0f, 22f), new Vector3(0f, 90f, 0f), Vector3.one * 1.35f);
             PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(3.4f, 0f, 26f), new Vector3(0f, -90f, 0f), Vector3.one * 1.35f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-1.8f, 0f, 24f), new Vector3(0f, 90f, 0f), Vector3.one * 1.2f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(1.8f, 0f, 24f), new Vector3(0f, -90f, 0f), Vector3.one * 1.2f);
 
             PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 31f), Vector3.zero, Vector3.one * 1.35f);
             PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-3.2f, 1.4f, 34f), new Vector3(0f, 0f, 90f), Vector3.one * 1.5f);
             PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 43f), Vector3.zero, Vector3.one * 1.5f);
+        }
+
+        private static void PlaceCompactDoorSequence(Transform parent)
+        {
+            // 일반 문은 통로를 막지 않는 얇은 시각 표시로 두고, 실제로 열리는 문은 Core Station과 연결합니다.
+            CreateDoorPanel(parent, "Door_01_To_02_Normal", new Vector3(0f, 1.6f, -11f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_02_To_03_Normal", new Vector3(0f, 1.6f, -5f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_03_To_04_Normal", new Vector3(0f, 1.6f, 1f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_04_To_05_Normal", new Vector3(0f, 1.6f, 7f), new Color(0.25f, 0.32f, 0.38f), false);
+
+            CreateDoorPanel(parent, "Door_06_To_07_AfterCore", new Vector3(0f, 1.6f, 19f), new Color(0.42f, 0.08f, 0.1f), false);
+            CreateDoorPanel(parent, "Door_07_To_08_Normal", new Vector3(0f, 1.6f, 25f), new Color(0.32f, 0.16f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_08_To_09_Normal", new Vector3(0f, 1.6f, 31f), new Color(0.08f, 0.38f, 0.42f), false);
+            CreateDoorPanel(parent, "Door_09_To_10_Normal", new Vector3(0f, 1.6f, 37f), new Color(0.08f, 0.42f, 0.25f), false);
+        }
+
+        private static GameObject CreateDoorPanel(Transform parent, string objectName, Vector3 position, Color color, bool addCollider)
+        {
+            GameObject doorRoot = new GameObject(objectName);
+            doorRoot.transform.SetParent(parent);
+            doorRoot.transform.position = ScaleMapPosition(position);
+
+            Material doorMaterial = CreateSceneMaterial($"{objectName}_Material", color);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_LeftLeaf", new Vector3(-1.6f, 0f, 0f), new Vector3(0.7f, 3.2f, 0.18f), doorMaterial, addCollider);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_RightLeaf", new Vector3(1.6f, 0f, 0f), new Vector3(0.7f, 3.2f, 0.18f), doorMaterial, addCollider);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_Header", new Vector3(0f, 1.55f, 0f), new Vector3(4.2f, 0.28f, 0.18f), doorMaterial, addCollider);
+
+            return doorRoot;
+        }
+
+        private static void CreateDoorLeaf(Transform parent, string objectName, Vector3 localPosition, Vector3 localScale, Material material, bool addCollider)
+        {
+            GameObject leaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            leaf.name = objectName;
+            leaf.transform.SetParent(parent);
+            leaf.transform.localPosition = localPosition;
+            leaf.transform.localRotation = Quaternion.identity;
+            leaf.transform.localScale = localScale;
+
+            Renderer renderer = leaf.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = material;
+            }
+
+            if (!addCollider)
+            {
+                Collider collider = leaf.GetComponent<Collider>();
+                if (collider != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(collider);
+                }
+            }
         }
 
         private static void CreateFloorGrid(Transform parent, string prefix, int xMin, int xMax, int zMin, int zMax, string modelName)
@@ -1101,14 +1158,14 @@ namespace AfterHours.EditorTools
             GameObject door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "SecurityDoor_Core_Test";
             door.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 13.5f));
-            door.transform.localScale = new Vector3(6.5f, 5f, 0.5f);
+            door.transform.localScale = new Vector3(4.4f, 3.4f, 0.28f);
             door.GetComponent<Renderer>().sharedMaterial = coreDoorMaterial;
 
             Component securityDoor = door.AddComponent(securityDoorType);
             SerializedObject serializedDoor = new SerializedObject(securityDoor);
             serializedDoor.FindProperty("doorTransform").objectReferenceValue = door.transform;
             serializedDoor.FindProperty("openAudio").objectReferenceValue = null;
-            serializedDoor.FindProperty("openOffset").vector3Value = new Vector3(0f, 3f, 0f);
+            serializedDoor.FindProperty("openOffset").vector3Value = new Vector3(0f, 4f, 0f);
             serializedDoor.FindProperty("openDuration").floatValue = 1.5f;
             serializedDoor.ApplyModifiedPropertiesWithoutUndo();
 
@@ -1246,11 +1303,11 @@ namespace AfterHours.EditorTools
                 { "reach_anchor_room", "04 ANCHOR에서 끌려가기 테스트", "초록색 방의 고정 기둥을 2초 이상 잡아 플레이어가 끌려가는지 확인하세요.", "앵커 방에 도착했습니다." },
                 { "reach_core_lab", "05 CORE에서 Energy Core 찾기", "파란 코어 방으로 이동하세요. 파란 공이 Energy Core, 회색 판이 Core Station입니다.", "코어 방에 도착했습니다." },
                 { "charge_core", "Energy Core를 Core Station에 올리기", "Grab Pack으로 파란 Energy Core를 끌어 회색 Core Station 위에 올리세요.", "충전 완료. 다음 보안문이 열렸습니다." },
-                { "reach_security", "06 SECURITY로 진입", "열린 문을 지나 붉은 보안 방으로 들어가세요.", "보안 방을 통과했습니다." },
-                { "reach_puzzle", "07 PUZZLE 방으로 이동", "분홍색 작은 방으로 이동하세요. 이곳은 다음 퍼즐 확장용 방입니다.", "퍼즐 방에 도착했습니다." },
-                { "reach_airlock", "08 AIRLOCK 진입", "청록색 Airlock 방으로 이동해 탈출 절차를 시작하세요.", "Airlock에 진입했습니다." },
-                { "reach_decon", "09 DECON 통과", "녹색 오염 제거 방을 지나 마지막 출구 방으로 이동하세요.", "오염 제거 방을 통과했습니다." },
-                { "reach_escape", "10 ESCAPE 도착", "밝은 마지막 방까지 이동하세요. 여기가 현재 테스트 탈출 지점입니다.", "Escape Bay에 도착했습니다. 탈출 성공!" }
+                { "reach_security", "06 SECURITY 통과", "열린 파란 보안문을 지나 붉은 방으로 들어가세요. 다음 방 입구의 앵커를 잡으면 이동이 쉬워집니다.", "보안 방을 통과했습니다." },
+                { "reach_puzzle", "07 PUZZLE에서 앵커 연결", "분홍색 방의 좌우 앵커를 번갈아 잡아 다음 문 방향으로 이동하세요.", "퍼즐 방을 통과했습니다." },
+                { "reach_airlock", "08 AIRLOCK 문 통과", "청록색 에어락의 열린 일반문 사이를 지나 다음 방으로 이동하세요.", "Airlock에 진입했습니다." },
+                { "reach_decon", "09 DECON 오염 제거실 통과", "녹색 방의 파이프 링을 지나 마지막 탈출문 방향으로 이동하세요.", "오염 제거 방을 통과했습니다." },
+                { "reach_escape", "10 ESCAPE 탈출 지점 도착", "밝은 마지막 방의 큰 출구 문 앞까지 이동하세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
             };
 
             missionSteps.arraySize = data.GetLength(0);
