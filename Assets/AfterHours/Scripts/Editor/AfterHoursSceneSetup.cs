@@ -416,32 +416,32 @@ namespace AfterHours.EditorTools
 
         private static void PlaceCompactRoomProps(Transform parent)
         {
-            PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-6f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2f);
-            PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-3.5f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 1.5f);
+            PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-6f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2.8f);
+            PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-2.8f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2.1f);
 
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-6f, 0f, 8f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(6f, 0f, 12f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-6f, 0f, 8f), new Vector3(0f, 90f, 0f), Vector3.one * 2.4f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(6f, 0f, 12f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-6.4f, 0f, 33f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
-            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(6.4f, 0f, 36f), new Vector3(0f, -90f, 0f), Vector3.one * 1.7f);
+            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-6.2f, 0f, 33f), new Vector3(0f, 90f, 0f), Vector3.one * 2.7f);
+            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(6.2f, 0f, 36f), new Vector3(0f, -90f, 0f), Vector3.one * 2.5f);
 
-            PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-6.6f, 1.6f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
-            PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(7.4f, 1.2f, 58f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-6.6f, 1.8f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2.8f);
+            PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(7.4f, 1.35f, 58f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-5.2f, 0f, 82f), Vector3.zero, Vector3.one * 1.8f);
-            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(7.4f, 1.2f, 82f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-5.2f, 0f, 82f), Vector3.zero, Vector3.one * 2.6f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(7.4f, 1.45f, 82f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 112f), Vector3.zero, Vector3.one * 1.8f);
-            PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-7.4f, 1.2f, 106f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 112f), Vector3.zero, Vector3.one * 2.5f);
+            PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-7.4f, 1.45f, 106f), new Vector3(0f, 90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-6.4f, 0f, 128f), new Vector3(0f, 90f, 0f), Vector3.one * 1.9f);
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(6.4f, 0f, 136f), new Vector3(0f, -90f, 0f), Vector3.one * 1.9f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-3.5f, 0f, 132f), new Vector3(0f, 90f, 0f), Vector3.one * 1.7f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(3.5f, 0f, 132f), new Vector3(0f, -90f, 0f), Vector3.one * 1.7f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-6.4f, 0f, 128f), new Vector3(0f, 90f, 0f), Vector3.one * 2.6f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(6.4f, 0f, 136f), new Vector3(0f, -90f, 0f), Vector3.one * 2.6f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-3.5f, 0f, 132f), new Vector3(0f, 90f, 0f), Vector3.one * 2.2f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(3.5f, 0f, 132f), new Vector3(0f, -90f, 0f), Vector3.one * 2.2f);
 
-            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 160f), Vector3.zero, Vector3.one * 1.9f);
-            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-6.2f, 1.7f, 178f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
-            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 210f), Vector3.zero, Vector3.one * 2.1f);
+            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 160f), Vector3.zero, Vector3.one * 2.6f);
+            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-6.2f, 1.9f, 178f), new Vector3(0f, 0f, 90f), Vector3.one * 2.8f);
+            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 210f), Vector3.zero, Vector3.one * 3f);
         }
 
         private static void PlaceCompactDoorSequence(Transform parent)
