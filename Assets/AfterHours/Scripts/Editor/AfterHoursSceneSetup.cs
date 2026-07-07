@@ -99,8 +99,8 @@ namespace AfterHours.EditorTools
             serializedMovement.FindProperty("characterController").objectReferenceValue = characterController;
             serializedMovement.FindProperty("cameraTransform").objectReferenceValue = cameraObject.transform;
             serializedMovement.FindProperty("characterAnimator").objectReferenceValue = astronaut.GetComponentInChildren<Animator>();
-            serializedMovement.FindProperty("walkSpeed").floatValue = 4f;
-            serializedMovement.FindProperty("runSpeed").floatValue = 7f;
+            serializedMovement.FindProperty("walkSpeed").floatValue = 5f;
+            serializedMovement.FindProperty("runSpeed").floatValue = 9f;
             serializedMovement.FindProperty("jumpHeight").floatValue = 1.5f;
             serializedMovement.FindProperty("gravity").floatValue = -20f;
             serializedMovement.FindProperty("rotationSmoothTime").floatValue = 0.1f;
@@ -350,36 +350,45 @@ namespace AfterHours.EditorTools
         private static void CreateCompactEscapeMapLayout(Transform mapRoot)
         {
             // 큰 홀을 없애고 작은 방을 하나씩 통과하는 탈출 코스로 재구성합니다.
-            CreateCompactRoom(mapRoot, "Room01_CheckIn", "01 CHECK-IN", -2, 2, -8, -6, new Color(0.35f, 0.85f, 1f));
-            CreateCompactRoom(mapRoot, "Room02_GrabPractice", "02 GRAB TEST", -2, 2, -5, -3, new Color(1f, 0.82f, 0.18f));
-            CreateCompactRoom(mapRoot, "Room03_Storage", "03 STORAGE", -2, 2, -2, 0, new Color(1f, 0.48f, 0.12f));
-            CreateCompactRoom(mapRoot, "Room04_AnchorShaft", "04 ANCHOR", -2, 2, 1, 3, new Color(0.25f, 1f, 0.45f));
-            CreateCompactRoom(mapRoot, "Room05_CoreLab", "05 CORE", -2, 2, 4, 6, new Color(0.12f, 0.48f, 1f));
-            CreateCompactRoom(mapRoot, "Room06_SecurityGate", "06 SECURITY", -2, 2, 7, 9, new Color(1f, 0.16f, 0.08f));
-            CreateCompactRoom(mapRoot, "Room07_PuzzleCell", "07 PUZZLE", -2, 2, 10, 12, new Color(1f, 0.25f, 0.65f));
-            CreateCompactRoom(mapRoot, "Room08_Airlock", "08 AIRLOCK", -2, 2, 13, 15, new Color(0.1f, 0.95f, 1f));
-            CreateCompactRoom(mapRoot, "Room09_Decon", "09 DECON", -2, 2, 16, 18, new Color(0.1f, 1f, 0.55f));
-            CreateCompactRoom(mapRoot, "Room10_EscapeBay", "10 ESCAPE", -2, 2, 19, 21, new Color(0.96f, 0.98f, 1f));
+            CreateCompactRoom(mapRoot, "Room01_CheckIn", "01 CHECK-IN", -4, 4, -10, -4, new Color(0.35f, 0.85f, 1f));
+            CreateConnectorCorridor(mapRoot, "Corridor_01_To_02", -1, 1, -3, 1);
+            CreateCompactRoom(mapRoot, "Room02_GrabPractice", "02 GRAB TEST", -4, 4, 2, 8, new Color(1f, 0.82f, 0.18f));
+            CreateConnectorCorridor(mapRoot, "Corridor_02_To_03", -1, 1, 9, 13);
+            CreateCompactRoom(mapRoot, "Room03_Storage", "03 STORAGE", -4, 4, 14, 20, new Color(1f, 0.48f, 0.12f));
+            CreateConnectorCorridor(mapRoot, "Corridor_03_To_04", -1, 1, 21, 25);
+            CreateCompactRoom(mapRoot, "Room04_AnchorShaft", "04 ANCHOR", -4, 4, 26, 32, new Color(0.25f, 1f, 0.45f));
+            CreateConnectorCorridor(mapRoot, "Corridor_04_To_05", -1, 1, 33, 37);
+            CreateCompactRoom(mapRoot, "Room05_CoreLab", "05 CORE", -4, 4, 38, 44, new Color(0.12f, 0.48f, 1f));
+            CreateConnectorCorridor(mapRoot, "Corridor_05_To_06", -1, 1, 45, 49);
+            CreateCompactRoom(mapRoot, "Room06_SecurityGate", "06 SECURITY", -4, 4, 50, 56, new Color(1f, 0.16f, 0.08f));
+            CreateConnectorCorridor(mapRoot, "Corridor_06_To_07", -1, 1, 57, 61);
+            CreateCompactRoom(mapRoot, "Room07_PuzzleCell", "07 PUZZLE", -4, 4, 62, 68, new Color(1f, 0.25f, 0.65f));
+            CreateConnectorCorridor(mapRoot, "Corridor_07_To_08", -1, 1, 69, 73);
+            CreateCompactRoom(mapRoot, "Room08_Airlock", "08 AIRLOCK", -4, 4, 74, 80, new Color(0.1f, 0.95f, 1f));
+            CreateConnectorCorridor(mapRoot, "Corridor_08_To_09", -1, 1, 81, 85);
+            CreateCompactRoom(mapRoot, "Room09_Decon", "09 DECON", -4, 4, 86, 92, new Color(0.1f, 1f, 0.55f));
+            CreateConnectorCorridor(mapRoot, "Corridor_09_To_10", -1, 1, 93, 97);
+            CreateCompactRoom(mapRoot, "Room10_EscapeBay", "10 ESCAPE", -4, 4, 98, 104, new Color(0.96f, 0.98f, 1f));
 
             PlaceCompactRoomProps(mapRoot);
             PlaceCompactDoorSequence(mapRoot);
             PlaceCompactObjectivePads(mapRoot);
 
             // GrabPack 이동 퍼즐용 앵커입니다. 움직일 수 없는 기둥이라 플레이어가 끌려갑니다.
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-2.8f, 1.8f, -8f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(2.8f, 1.8f, -6f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Shaft_A", new Vector3(0f, 1.8f, 4f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Security_Exit", new Vector3(0f, 1.8f, 18f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-3.1f, 1.8f, 22f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(3.1f, 1.8f, 26f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Airlock_A", new Vector3(0f, 1.8f, 30f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-5.8f, 1.8f, 8f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(5.8f, 1.8f, 12f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Shaft_A", new Vector3(0f, 1.8f, 58f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Security_Exit", new Vector3(0f, 1.8f, 110f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-5.8f, 1.8f, 128f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(5.8f, 1.8f, 136f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Airlock_A", new Vector3(0f, 1.8f, 154f));
 
             // 방 전체를 감싸는 보이지 않는 안전 경계입니다.
-            CreateMapCollider(mapRoot, "CompactMapSafetyFloor", new Vector3(0f, -0.35f, 13f), new Vector3(34f, 0.5f, 64f));
-            CreateMapCollider(mapRoot, "CompactMap_Left_Blocker", new Vector3(-8.2f, 5f, 13f), new Vector3(0.4f, 10f, 64f));
-            CreateMapCollider(mapRoot, "CompactMap_Right_Blocker", new Vector3(8.2f, 5f, 13f), new Vector3(0.4f, 10f, 64f));
-            CreateMapCollider(mapRoot, "CompactMap_Back_Blocker", new Vector3(0f, 5f, -18f), new Vector3(18f, 10f, 0.4f));
-            CreateMapCollider(mapRoot, "CompactMap_Front_Blocker", new Vector3(0f, 5f, 44f), new Vector3(18f, 10f, 0.4f));
+            CreateMapCollider(mapRoot, "CompactMapSafetyFloor", new Vector3(0f, -0.35f, 94f), new Vector3(54f, 0.5f, 236f));
+            CreateMapCollider(mapRoot, "CompactMap_Left_Blocker", new Vector3(-13.2f, 5f, 94f), new Vector3(0.4f, 10f, 236f));
+            CreateMapCollider(mapRoot, "CompactMap_Right_Blocker", new Vector3(13.2f, 5f, 94f), new Vector3(0.4f, 10f, 236f));
+            CreateMapCollider(mapRoot, "CompactMap_Back_Blocker", new Vector3(0f, 5f, -30f), new Vector3(28f, 10f, 0.4f));
+            CreateMapCollider(mapRoot, "CompactMap_Front_Blocker", new Vector3(0f, 5f, 218f), new Vector3(28f, 10f, 0.4f));
         }
 
         private static void CreateCompactRoom(Transform parent, string roomName, string labelText, int xMin, int xMax, int zMin, int zMax, Color accentColor)
@@ -407,61 +416,61 @@ namespace AfterHours.EditorTools
 
         private static void PlaceCompactRoomProps(Transform parent)
         {
-            PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-3.2f, 0f, -14.5f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
-            PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-1.5f, 0f, -14.5f), new Vector3(0f, 90f, 0f), Vector3.one);
+            PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-6f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2f);
+            PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-3.5f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 1.5f);
 
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-3.2f, 0f, -8f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(3.2f, 0f, -6f), new Vector3(0f, -90f, 0f), Vector3.one * 1.3f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-6f, 0f, 8f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(6f, 0f, 12f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
 
-            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-3.4f, 0f, -2f), new Vector3(0f, 90f, 0f), Vector3.one * 1.25f);
-            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(3.4f, 0f, 0f), new Vector3(0f, -90f, 0f), Vector3.one * 1.2f);
+            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-6.4f, 0f, 33f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(6.4f, 0f, 36f), new Vector3(0f, -90f, 0f), Vector3.one * 1.7f);
 
-            PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-3.6f, 1.4f, 4f), new Vector3(0f, 0f, 90f), Vector3.one * 1.6f);
-            PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(3.9f, 1f, 4f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+            PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-6.6f, 1.6f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
+            PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(7.4f, 1.2f, 58f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
 
-            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-2.6f, 0f, 10f), Vector3.zero, Vector3.one * 1.25f);
-            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(4f, 1f, 10f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-5.2f, 0f, 82f), Vector3.zero, Vector3.one * 1.8f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(7.4f, 1.2f, 82f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
 
-            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 19f), Vector3.zero, Vector3.one * 1.25f);
-            PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-4f, 1f, 16f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
+            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 112f), Vector3.zero, Vector3.one * 1.8f);
+            PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-7.4f, 1.2f, 106f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
 
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-3.4f, 0f, 22f), new Vector3(0f, 90f, 0f), Vector3.one * 1.35f);
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(3.4f, 0f, 26f), new Vector3(0f, -90f, 0f), Vector3.one * 1.35f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-1.8f, 0f, 24f), new Vector3(0f, 90f, 0f), Vector3.one * 1.2f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(1.8f, 0f, 24f), new Vector3(0f, -90f, 0f), Vector3.one * 1.2f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-6.4f, 0f, 128f), new Vector3(0f, 90f, 0f), Vector3.one * 1.9f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(6.4f, 0f, 136f), new Vector3(0f, -90f, 0f), Vector3.one * 1.9f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-3.5f, 0f, 132f), new Vector3(0f, 90f, 0f), Vector3.one * 1.7f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(3.5f, 0f, 132f), new Vector3(0f, -90f, 0f), Vector3.one * 1.7f);
 
-            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 31f), Vector3.zero, Vector3.one * 1.35f);
-            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-3.2f, 1.4f, 34f), new Vector3(0f, 0f, 90f), Vector3.one * 1.5f);
-            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 43f), Vector3.zero, Vector3.one * 1.5f);
+            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 160f), Vector3.zero, Vector3.one * 1.9f);
+            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-6.2f, 1.7f, 178f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
+            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 210f), Vector3.zero, Vector3.one * 2.1f);
         }
 
         private static void PlaceCompactDoorSequence(Transform parent)
         {
             // 일반 문은 통로를 막지 않는 얇은 시각 표시로 두고, 실제로 열리는 문은 Core Station과 연결합니다.
-            CreateDoorPanel(parent, "Door_01_To_02_Normal", new Vector3(0f, 1.6f, -11f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_02_To_03_Normal", new Vector3(0f, 1.6f, -5f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_03_To_04_Normal", new Vector3(0f, 1.6f, 1f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_04_To_05_Normal", new Vector3(0f, 1.6f, 7f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_01_To_02_Normal", new Vector3(0f, 1.6f, -3f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_02_To_03_Normal", new Vector3(0f, 1.6f, 21f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_03_To_04_Normal", new Vector3(0f, 1.6f, 45f), new Color(0.25f, 0.32f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_04_To_05_Normal", new Vector3(0f, 1.6f, 69f), new Color(0.25f, 0.32f, 0.38f), false);
 
-            CreateDoorPanel(parent, "Door_06_To_07_AfterCore", new Vector3(0f, 1.6f, 19f), new Color(0.42f, 0.08f, 0.1f), false);
-            CreateDoorPanel(parent, "Door_07_To_08_Normal", new Vector3(0f, 1.6f, 25f), new Color(0.32f, 0.16f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_08_To_09_Normal", new Vector3(0f, 1.6f, 31f), new Color(0.08f, 0.38f, 0.42f), false);
-            CreateDoorPanel(parent, "Door_09_To_10_Normal", new Vector3(0f, 1.6f, 37f), new Color(0.08f, 0.42f, 0.25f), false);
+            CreateDoorPanel(parent, "Door_06_To_07_AfterCore", new Vector3(0f, 1.6f, 117f), new Color(0.42f, 0.08f, 0.1f), false);
+            CreateDoorPanel(parent, "Door_07_To_08_Normal", new Vector3(0f, 1.6f, 141f), new Color(0.32f, 0.16f, 0.38f), false);
+            CreateDoorPanel(parent, "Door_08_To_09_Normal", new Vector3(0f, 1.6f, 165f), new Color(0.08f, 0.38f, 0.42f), false);
+            CreateDoorPanel(parent, "Door_09_To_10_Normal", new Vector3(0f, 1.6f, 189f), new Color(0.08f, 0.42f, 0.25f), false);
         }
 
         private static void PlaceCompactObjectivePads(Transform parent)
         {
             // 방 입구가 아니라 실제 목표 지점에 작은 발광 패드를 둡니다.
-            CreateObjectivePad(parent, "ObjectivePad_CheckInConsole", new Vector3(-3.2f, 0.08f, -14.5f), new Color(0.35f, 0.85f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_GrabTarget", new Vector3(2.2f, 0.08f, -8.2f), new Color(1f, 0.82f, 0.18f));
-            CreateObjectivePad(parent, "ObjectivePad_StorageCrate", new Vector3(-3.1f, 0.08f, -1.6f), new Color(1f, 0.48f, 0.12f));
-            CreateObjectivePad(parent, "ObjectivePad_AnchorExit", new Vector3(0f, 0.08f, 6.1f), new Color(0.25f, 1f, 0.45f));
-            CreateObjectivePad(parent, "ObjectivePad_CorePickup", new Vector3(-2.4f, 0.08f, 10f), new Color(0.12f, 0.48f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_SecurityConsole", new Vector3(-3.2f, 0.08f, 16f), new Color(1f, 0.16f, 0.08f));
-            CreateObjectivePad(parent, "ObjectivePad_PuzzleExit", new Vector3(0f, 0.08f, 24.8f), new Color(1f, 0.25f, 0.65f));
-            CreateObjectivePad(parent, "ObjectivePad_AirlockConsole", new Vector3(2.8f, 0.08f, 28f), new Color(0.1f, 0.95f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_DeconRing", new Vector3(-3.1f, 0.08f, 34f), new Color(0.1f, 1f, 0.55f));
-            CreateObjectivePad(parent, "ObjectivePad_EscapeDoor", new Vector3(0f, 0.08f, 41.6f), new Color(0.96f, 0.98f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_CheckInConsole", new Vector3(-6f, 0.08f, -17f), new Color(0.35f, 0.85f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_GrabTarget", new Vector3(4.8f, 0.08f, 8f), new Color(1f, 0.82f, 0.18f));
+            CreateObjectivePad(parent, "ObjectivePad_StorageCrate", new Vector3(-6f, 0.08f, 33f), new Color(1f, 0.48f, 0.12f));
+            CreateObjectivePad(parent, "ObjectivePad_AnchorExit", new Vector3(0f, 0.08f, 66f), new Color(0.25f, 1f, 0.45f));
+            CreateObjectivePad(parent, "ObjectivePad_CorePickup", new Vector3(-5.2f, 0.08f, 82f), new Color(0.12f, 0.48f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_SecurityConsole", new Vector3(-6.2f, 0.08f, 106f), new Color(1f, 0.16f, 0.08f));
+            CreateObjectivePad(parent, "ObjectivePad_PuzzleExit", new Vector3(0f, 0.08f, 140f), new Color(1f, 0.25f, 0.65f));
+            CreateObjectivePad(parent, "ObjectivePad_AirlockConsole", new Vector3(5.8f, 0.08f, 154f), new Color(0.1f, 0.95f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_DeconRing", new Vector3(-6f, 0.08f, 178f), new Color(0.1f, 1f, 0.55f));
+            CreateObjectivePad(parent, "ObjectivePad_EscapeDoor", new Vector3(0f, 0.08f, 206f), new Color(0.96f, 0.98f, 1f));
         }
 
         private static void CreateObjectivePad(Transform parent, string objectName, Vector3 position, Color color)
@@ -470,7 +479,7 @@ namespace AfterHours.EditorTools
             pad.name = objectName;
             pad.transform.SetParent(parent);
             pad.transform.position = ScaleMapPosition(position);
-            pad.transform.localScale = new Vector3(1.25f, 0.04f, 1.25f);
+            pad.transform.localScale = new Vector3(2.8f, 0.08f, 2.8f);
 
             Renderer renderer = pad.GetComponent<Renderer>();
             if (renderer != null)
@@ -492,9 +501,9 @@ namespace AfterHours.EditorTools
             doorRoot.transform.position = ScaleMapPosition(position);
 
             Material doorMaterial = CreateSceneMaterial($"{objectName}_Material", color);
-            CreateDoorLeaf(doorRoot.transform, $"{objectName}_LeftLeaf", new Vector3(-1.6f, 0f, 0f), new Vector3(0.7f, 3.2f, 0.18f), doorMaterial, addCollider);
-            CreateDoorLeaf(doorRoot.transform, $"{objectName}_RightLeaf", new Vector3(1.6f, 0f, 0f), new Vector3(0.7f, 3.2f, 0.18f), doorMaterial, addCollider);
-            CreateDoorLeaf(doorRoot.transform, $"{objectName}_Header", new Vector3(0f, 1.55f, 0f), new Vector3(4.2f, 0.28f, 0.18f), doorMaterial, addCollider);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_LeftLeaf", new Vector3(-2.25f, 0f, 0f), new Vector3(1.05f, 4.1f, 0.22f), doorMaterial, addCollider);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_RightLeaf", new Vector3(2.25f, 0f, 0f), new Vector3(1.05f, 4.1f, 0.22f), doorMaterial, addCollider);
+            CreateDoorLeaf(doorRoot.transform, $"{objectName}_Header", new Vector3(0f, 2f, 0f), new Vector3(5.6f, 0.35f, 0.22f), doorMaterial, addCollider);
 
             return doorRoot;
         }
@@ -913,7 +922,7 @@ namespace AfterHours.EditorTools
         private static void CreateGrabTargetTestObject()
         {
             GameObject targetRoot = new GameObject("GrabTarget_CharacterG");
-            targetRoot.transform.position = ScaleMapPosition(new Vector3(2f, 1f, -8f));
+            targetRoot.transform.position = ScaleMapPosition(new Vector3(4.8f, 1f, 8f));
             targetRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
             Rigidbody targetRigidbody = targetRoot.AddComponent<Rigidbody>();
@@ -1123,8 +1132,8 @@ namespace AfterHours.EditorTools
 
             GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             core.name = "EnergyCore_Test";
-            core.transform.position = ScaleMapPosition(new Vector3(-2.4f, 1f, 10f));
-            core.transform.localScale = Vector3.one * 0.7f;
+            core.transform.position = ScaleMapPosition(new Vector3(-5.2f, 1.1f, 82f));
+            core.transform.localScale = Vector3.one * 1.25f;
 
             Rigidbody coreRigidbody = core.AddComponent<Rigidbody>();
             coreRigidbody.mass = 0.75f;
@@ -1194,8 +1203,8 @@ namespace AfterHours.EditorTools
 
             GameObject door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "SecurityDoor_Core_Test";
-            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 13.5f));
-            door.transform.localScale = new Vector3(4.4f, 3.4f, 0.28f);
+            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.7f, 93f));
+            door.transform.localScale = new Vector3(6.4f, 4.2f, 0.35f);
             door.GetComponent<Renderer>().sharedMaterial = coreDoorMaterial;
 
             Component securityDoor = door.AddComponent(securityDoorType);
@@ -1208,8 +1217,8 @@ namespace AfterHours.EditorTools
 
             GameObject station = GameObject.CreatePrimitive(PrimitiveType.Cube);
             station.name = "CoreStation_Test";
-            station.transform.position = ScaleMapPosition(new Vector3(2.4f, 0.15f, 10f));
-            station.transform.localScale = new Vector3(2.5f, 0.3f, 2.5f);
+            station.transform.position = ScaleMapPosition(new Vector3(5.2f, 0.15f, 82f));
+            station.transform.localScale = new Vector3(3.6f, 0.35f, 3.6f);
             station.GetComponent<Renderer>().sharedMaterial = stationMaterial;
 
             BoxCollider stationCollider = station.GetComponent<BoxCollider>();
@@ -1275,16 +1284,16 @@ namespace AfterHours.EditorTools
             ConfigureMissionSteps(serializedMission.FindProperty("missionSteps"));
             serializedMission.ApplyModifiedPropertiesWithoutUndo();
 
-            CreateMissionTrigger("MissionTrigger_CheckInConsolePad", "check_in_console", missionManager, new Vector3(-3.2f, 1.2f, -14.5f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_GrabTargetPad", "reach_grab_practice", missionManager, new Vector3(2.2f, 1.2f, -8.2f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_StorageCratePad", "reach_storage", missionManager, new Vector3(-3.1f, 1.2f, -1.6f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_AnchorExitPad", "reach_anchor_room", missionManager, new Vector3(0f, 1.2f, 6.1f), new Vector3(2.4f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_CorePickupPad", "reach_core_lab", missionManager, new Vector3(-2.4f, 1.2f, 10f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_SecurityConsolePad", "reach_security", missionManager, new Vector3(-3.2f, 1.2f, 16f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_PuzzleExitPad", "reach_puzzle", missionManager, new Vector3(0f, 1.2f, 24.8f), new Vector3(2.4f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_AirlockConsolePad", "reach_airlock", missionManager, new Vector3(2.8f, 1.2f, 28f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_DeconRingPad", "reach_decon", missionManager, new Vector3(-3.1f, 1.2f, 34f), new Vector3(2.2f, 2.4f, 2.2f));
-            CreateMissionTrigger("MissionTrigger_EscapeDoorPad", "reach_escape", missionManager, new Vector3(0f, 1.2f, 41.6f), new Vector3(2.6f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_CheckInConsolePad", "check_in_console", missionManager, new Vector3(-6f, 1.2f, -17f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_GrabTargetPad", "reach_grab_practice", missionManager, new Vector3(4.8f, 1.2f, 8f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_StorageCratePad", "reach_storage", missionManager, new Vector3(-6f, 1.2f, 33f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_AnchorExitPad", "reach_anchor_room", missionManager, new Vector3(0f, 1.2f, 66f), new Vector3(4.4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_CorePickupPad", "reach_core_lab", missionManager, new Vector3(-5.2f, 1.2f, 82f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_SecurityConsolePad", "reach_security", missionManager, new Vector3(-6.2f, 1.2f, 106f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_PuzzleExitPad", "reach_puzzle", missionManager, new Vector3(0f, 1.2f, 140f), new Vector3(4.4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_AirlockConsolePad", "reach_airlock", missionManager, new Vector3(5.8f, 1.2f, 154f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_DeconRingPad", "reach_decon", missionManager, new Vector3(-6f, 1.2f, 178f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_EscapeDoorPad", "reach_escape", missionManager, new Vector3(0f, 1.2f, 206f), new Vector3(4.8f, 2.4f, 4f));
 
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             CoreStation station = coreStation != null ? coreStation.GetComponent<CoreStation>() : null;
@@ -1435,18 +1444,18 @@ namespace AfterHours.EditorTools
             serializedGrabPack.FindProperty("rightArmVisual").objectReferenceValue = rightArmVisual;
             serializedGrabPack.FindProperty("leftHandVisual").objectReferenceValue = leftHandVisual;
             serializedGrabPack.FindProperty("rightHandVisual").objectReferenceValue = rightHandVisual;
-            serializedGrabPack.FindProperty("grabRange").floatValue = 8f;
-            serializedGrabPack.FindProperty("pullForce").floatValue = 35f;
-            serializedGrabPack.FindProperty("breakDistance").floatValue = 12f;
+            serializedGrabPack.FindProperty("grabRange").floatValue = 18f;
+            serializedGrabPack.FindProperty("pullForce").floatValue = 42f;
+            serializedGrabPack.FindProperty("breakDistance").floatValue = 24f;
             serializedGrabPack.FindProperty("cooldown").floatValue = 0.25f;
-            serializedGrabPack.FindProperty("armExtendSpeed").floatValue = 22f;
-            serializedGrabPack.FindProperty("armRetractSpeed").floatValue = 26f;
-            serializedGrabPack.FindProperty("armRadius").floatValue = 0.06f;
-            serializedGrabPack.FindProperty("handVisualSize").floatValue = 0.22f;
+            serializedGrabPack.FindProperty("armExtendSpeed").floatValue = 32f;
+            serializedGrabPack.FindProperty("armRetractSpeed").floatValue = 34f;
+            serializedGrabPack.FindProperty("armRadius").floatValue = 0.08f;
+            serializedGrabPack.FindProperty("handVisualSize").floatValue = 0.32f;
             serializedGrabPack.FindProperty("enablePlayerPull").boolValue = true;
             serializedGrabPack.FindProperty("playerPullDelay").floatValue = 2f;
-            serializedGrabPack.FindProperty("playerPullSpeed").floatValue = 8f;
-            serializedGrabPack.FindProperty("playerPullStopDistance").floatValue = 1.5f;
+            serializedGrabPack.FindProperty("playerPullSpeed").floatValue = 10f;
+            serializedGrabPack.FindProperty("playerPullStopDistance").floatValue = 2f;
             serializedGrabPack.ApplyModifiedPropertiesWithoutUndo();
         }
 
