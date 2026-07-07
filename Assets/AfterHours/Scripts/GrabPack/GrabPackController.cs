@@ -40,6 +40,9 @@ public class GrabPackController : MonoBehaviour
     [SerializeField] private float playerPullSpeed = 8f;
     [SerializeField] private float playerPullStopDistance = 1.5f;
 
+    [Header("장비 획득 설정")]
+    [SerializeField] private bool isGrabPackUsable = true;
+
     private readonly GrabArm leftArm = new GrabArm();
     private readonly GrabArm rightArm = new GrabArm();
 
@@ -59,6 +62,13 @@ public class GrabPackController : MonoBehaviour
 
     private void Update()
     {
+        if (!isGrabPackUsable)
+        {
+            ReleaseArm(leftArm);
+            ReleaseArm(rightArm);
+            return;
+        }
+
         if (cameraTransform == null)
         {
             ReleaseArm(leftArm);
@@ -72,9 +82,26 @@ public class GrabPackController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!isGrabPackUsable)
+        {
+            return;
+        }
+
         PullArm(leftArm);
         PullArm(rightArm);
         PullPlayerToGrabbedTarget();
+    }
+
+    public void SetGrabPackUsable(bool canUse)
+    {
+        isGrabPackUsable = canUse;
+
+        if (!isGrabPackUsable)
+        {
+            // 장비를 사용할 수 없을 때는 남아 있는 팔 비주얼과 잡기 상태를 정리합니다.
+            ReleaseArm(leftArm);
+            ReleaseArm(rightArm);
+        }
     }
 
     private void UpdateArm(GrabArm arm, GrabArm otherArm, bool isPressed, bool wasPressed, bool wasReleased)

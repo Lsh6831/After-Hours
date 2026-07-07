@@ -1,7 +1,9 @@
+using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace AfterHours.EditorTools
 {
@@ -32,6 +34,8 @@ namespace AfterHours.EditorTools
 
             ConfigureMissionSteps(missionManager);
             ConfigureExistingMissionTriggers(missionManager);
+            ConfigureAreaLabels();
+            ConfigureGrabPackPickup(missionManager);
             ConfigureCoreStation("CoreStation_Test", missionManager, "swap_battery_01");
             ConfigureMissionDoors(patchRoot, missionManager);
             CreateSignalLightRoom(patchRoot, missionManager);
@@ -89,10 +93,89 @@ namespace AfterHours.EditorTools
         {
             SetMissionTrigger("MissionTrigger_CheckInConsolePad", missionManager, "check_in_console");
             SetMissionTrigger("MissionTrigger_StorageCratePad", missionManager, "check_storage");
-            SetMissionTrigger("MissionTrigger_GrabTargetPad", missionManager, "test_grab_gear");
+            SetMissionTrigger("MissionTrigger_GrabTargetPad", missionManager, "grab_test_after_pickup");
             SetMissionTrigger("MissionTrigger_AnchorExitPad", missionManager, "use_anchor");
             SetMissionTrigger("MissionTrigger_PuzzleExitPad", missionManager, "clear_final_mix");
             SetMissionTrigger("MissionTrigger_EscapeDoorPad", missionManager, "clock_out");
+        }
+
+        private static void ConfigureAreaLabels()
+        {
+            SetTextMeshLabel("Room01_CheckIn_Label", "01 퇴근 점검 시작\n컴퓨터 확인");
+            SetTextMeshLabel("Room02_GrabPractice_Label", "02 그랩 장비 획득\n장비에 닿아 좌/우클릭 해금");
+            SetTextMeshLabel("Room03_Storage_Label", "03 스토리지 확인\n왼쪽 점프 구간");
+            SetTextMeshLabel("Room04_AnchorShaft_Label", "04 앵커 사용\n잡고 끌려가기");
+            SetTextMeshLabel("Room05_CoreLab_Label", "05 배터리 교체\n푸른 코어 투입");
+            SetTextMeshLabel("Room06_SecurityGate_Label", "06 신호등 점검\n불 꺼질 때 통과");
+            SetTextMeshLabel("Room07_PuzzleCell_Label", "07 배터리 교체 2\n코어와 앵커 동시 활용");
+            SetTextMeshLabel("Room08_Airlock_Label", "08 직원 퇴근 시키기\n로봇을 창문 밖으로");
+            SetTextMeshLabel("Room09_Decon_Label", "09 종합 점검\n라이트 + 점프 + 그랩");
+            SetTextMeshLabel("Room10_EscapeBay_Label", "10 퇴근 완료\n점검완 찍기");
+        }
+
+        private static void SetTextMeshLabel(string objectName, string labelText)
+        {
+            GameObject labelObject = GameObject.Find(objectName);
+            TextMesh textMesh = labelObject != null ? labelObject.GetComponent<TextMesh>() : null;
+            if (textMesh == null)
+            {
+                Debug.LogWarning($"{objectName} 라벨을 찾지 못했습니다.");
+                return;
+            }
+
+            textMesh.text = labelText;
+        }
+
+        private static void ConfigureGrabPackPickup(MissionManager missionManager)
+        {
+            GrabPackController grabPackController = Object.FindAnyObjectByType<GrabPackController>();
+            if (grabPackController == null)
+            {
+                Debug.LogWarning("GrabPackController를 찾지 못해 장비 획득 설정을 건너뜁니다.");
+                return;
+            }
+
+            SerializedObject serializedController = new SerializedObject(grabPackController);
+            serializedController.FindProperty("isGrabPackUsable").boolValue = false;
+            serializedController.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject pickupObject = GameObject.Find("Grab Pack Rig by D1GQ");
+            if (pickupObject == null)
+            {
+                Debug.LogWarning("Grab Pack Rig by D1GQ 오브젝트를 찾지 못했습니다.");
+                return;
+            }
+
+            BoxCollider pickupCollider = pickupObject.GetComponent<BoxCollider>();
+            if (pickupCollider == null)
+            {
+                pickupCollider = pickupObject.AddComponent<BoxCollider>();
+            }
+
+            pickupCollider.isTrigger = true;
+            pickupCollider.size = new Vector3(3f, 2.6f, 3f);
+            pickupCollider.center = new Vector3(0f, 1.3f, 0f);
+
+            Type pickupType = Type.GetType("GrabPackPickup, Assembly-CSharp");
+            if (pickupType == null)
+            {
+                Debug.LogWarning("GrabPackPickup 타입을 찾지 못해 장비 획득 트리거 연결을 건너뜁니다.");
+                return;
+            }
+
+            Component pickup = pickupObject.GetComponent(pickupType);
+            if (pickup == null)
+            {
+                pickup = pickupObject.AddComponent(pickupType);
+            }
+
+            SerializedObject serializedPickup = new SerializedObject(pickup);
+            serializedPickup.FindProperty("grabPackController").objectReferenceValue = grabPackController;
+            serializedPickup.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedPickup.FindProperty("completionObjectiveId").stringValue = "test_grab_gear";
+            serializedPickup.FindProperty("completeMissionOnPickup").boolValue = true;
+            serializedPickup.FindProperty("hideAfterPickup").boolValue = false;
+            serializedPickup.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void SetMissionTrigger(string objectName, MissionManager missionManager, string objectiveId)
@@ -150,15 +233,28 @@ namespace AfterHours.EditorTools
 
             string[] openDoorNames =
             {
-                "Door_01_To_02_Normal",
-                "Door_02_To_03_Normal",
-                "Door_03_To_04_Normal",
-                "Door_04_To_05_Normal",
-                "SecurityDoor_Core_Test",
-                "Door_06_To_07_AfterCore",
-                "Door_07_To_08_Normal",
-                "Door_08_To_09_Normal",
+                "door-double-Open",
+                "door-double-Open2",
+                "door-double-Open3",
+                "door-double-Open4",
+                "door-double-Open5",
+                "door-double-Open6",
+                "door-double-Open7",
+                "door-double-Open8",
                 "Door_09_To_10_Normal"
+            };
+
+            string[] closeDoorNames =
+            {
+                "door-double-closed",
+                "door-double-closed2",
+                "door-double-closed3",
+                "door-double-closed4",
+                "door-double-closed5",
+                "door-double-closed6",
+                "door-double-closed7",
+                "door-double-closed8",
+                "door-double-closed9"
             };
 
             string[] closeSpawnNames =
@@ -186,7 +282,13 @@ namespace AfterHours.EditorTools
                 SecurityDoor openDoor = ConfigureDoor(openDoorObject, false, 2.4f, 0.35f);
                 CreateMissionDoorController(patchRoot, $"ClockOut_OpenDoor_{i + 1:00}", missionManager, openDoor, objectiveIds[i]);
 
-                GameObject backLockObject = GetOrCreateBackLockDoor(patchRoot, i + 1, openDoorObject.transform.position);
+                GameObject backLockObject = GameObject.Find(closeDoorNames[i]);
+                if (backLockObject == null)
+                {
+                    backLockObject = GetOrCreateBackLockDoor(patchRoot, i + 1, openDoorObject.transform.position);
+                    Debug.LogWarning($"{closeDoorNames[i]} 문을 찾지 못해 보조 뒤잠금 문을 생성했습니다.");
+                }
+
                 SecurityDoor backLockDoor = ConfigureDoor(backLockObject, true, 2.4f, 0.28f);
 
                 GameObject spawnObject = GameObject.Find(closeSpawnNames[i]);
