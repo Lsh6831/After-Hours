@@ -33,6 +33,7 @@ namespace AfterHours.EditorTools
             Transform patchRoot = GetOrCreateRoot(PatchRootName).transform;
 
             RemoveLegacyBackLockDoors();
+            RemoveLegacyBlockingDoors();
             ConfigureMissionSteps(missionManager);
             ConfigureExistingMissionTriggers(missionManager);
             ConfigureAreaLabels();
@@ -66,6 +67,30 @@ namespace AfterHours.EditorTools
             for (int i = 1; i <= 9; i++)
             {
                 GameObject legacyDoor = GameObject.Find($"ClockOut_BackLockDoor_{i:00}");
+                if (legacyDoor != null)
+                {
+                    Object.DestroyImmediate(legacyDoor);
+                }
+            }
+        }
+
+        private static void RemoveLegacyBlockingDoors()
+        {
+            string[] legacyDoorNames =
+            {
+                "Door_01_To_02_Normal",
+                "Door_02_To_03_Normal",
+                "Door_03_To_04_Normal",
+                "Door_04_To_05_Normal",
+                "SecurityDoor_Core_Test",
+                "Door_06_To_07_AfterCore",
+                "Door_07_To_08_Normal",
+                "Door_08_To_09_Normal"
+            };
+
+            foreach (string legacyDoorName in legacyDoorNames)
+            {
+                GameObject legacyDoor = GameObject.Find(legacyDoorName);
                 if (legacyDoor != null)
                 {
                     Object.DestroyImmediate(legacyDoor);
@@ -139,6 +164,28 @@ namespace AfterHours.EditorTools
             }
 
             textMesh.text = labelText;
+            ConfigureLabelDistanceVisibility(labelObject);
+        }
+
+        private static void ConfigureLabelDistanceVisibility(GameObject labelObject)
+        {
+            Type visibilityType = Type.GetType("WorldLabelDistanceVisibility, Assembly-CSharp");
+            if (visibilityType == null)
+            {
+                Debug.LogWarning("WorldLabelDistanceVisibility 타입을 찾지 못해 라벨 거리 숨김 설정을 건너뜁니다.");
+                return;
+            }
+
+            Component visibility = labelObject.GetComponent(visibilityType);
+            if (visibility == null)
+            {
+                visibility = labelObject.AddComponent(visibilityType);
+            }
+
+            SerializedObject serializedVisibility = new SerializedObject(visibility);
+            serializedVisibility.FindProperty("cameraTransform").objectReferenceValue = Camera.main != null ? Camera.main.transform : null;
+            serializedVisibility.FindProperty("visibleDistance").floatValue = 34f;
+            serializedVisibility.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void ConfigureQuestObjectPositions()
