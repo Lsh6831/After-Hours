@@ -1432,7 +1432,7 @@ namespace AfterHours.EditorTools
 
         private static void ConnectWarningLightGates(CheckpointRespawnManager respawnManager)
         {
-            WarningLightGate[] gates = UnityEngine.Object.FindObjectsByType<WarningLightGate>(FindObjectsInactive.Include);
+            WarningLightGate[] gates = UnityEngine.Object.FindObjectsByType<WarningLightGate>(FindObjectsSortMode.None);
             foreach (WarningLightGate gate in gates)
             {
                 SerializedObject serializedGate = new SerializedObject(gate);
