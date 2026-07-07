@@ -20,9 +20,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float jumpHeight = 1.5f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float rotationSmoothTime = 0.1f;
+    [SerializeField] private float jumpBufferTime = 0.15f;
+    [SerializeField] private float coyoteTime = 0.12f;
 
     private float verticalVelocity;
     private float rotationSmoothVelocity;
+    private float jumpBufferCounter;
+    private float coyoteCounter;
 
     private void Reset()
     {
@@ -96,15 +100,38 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyGravityAndJump()
     {
-        if (characterController.isGrounded && verticalVelocity < 0f)
+        bool isGrounded = characterController.isGrounded;
+
+        if (WasJumpPressed())
+        {
+            // 이동/달리기 중 눌린 점프 입력이 한 프레임에 버려지지 않도록 잠깐 보관합니다.
+            jumpBufferCounter = jumpBufferTime;
+        }
+        else
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+
+        if (isGrounded)
+        {
+            coyoteCounter = coyoteTime;
+        }
+        else
+        {
+            coyoteCounter -= Time.deltaTime;
+        }
+
+        if (isGrounded && verticalVelocity < 0f)
         {
             // 바닥에 붙어 있도록 작은 음수 값을 유지합니다.
             verticalVelocity = -2f;
         }
 
-        if (characterController.isGrounded && WasJumpPressed())
+        if (jumpBufferCounter > 0f && coyoteCounter > 0f)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumpBufferCounter = 0f;
+            coyoteCounter = 0f;
         }
 
         verticalVelocity += gravity * Time.deltaTime;
@@ -176,5 +203,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // 체크포인트로 되돌아온 직후 이전 낙하 속도가 남지 않도록 초기화합니다.
         verticalVelocity = -2f;
+        jumpBufferCounter = 0f;
+        coyoteCounter = 0f;
     }
 }

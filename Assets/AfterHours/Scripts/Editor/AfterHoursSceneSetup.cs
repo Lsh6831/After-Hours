@@ -393,8 +393,7 @@ namespace AfterHours.EditorTools
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(5.8f, 1.8f, 136f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Airlock_A", new Vector3(0f, 1.8f, 154f));
 
-            // 방 전체를 감싸는 보이지 않는 안전 경계입니다.
-            CreateMapCollider(mapRoot, "CompactMapSafetyFloor", new Vector3(0f, -0.35f, 94f), new Vector3(54f, 0.5f, 236f));
+            // 바닥이 없는 곳은 실제로 떨어지도록 전체 안전 바닥은 만들지 않습니다.
             CreateMapCollider(mapRoot, "CompactMap_Left_Blocker", new Vector3(-13.2f, 5f, 94f), new Vector3(0.4f, 10f, 236f));
             CreateMapCollider(mapRoot, "CompactMap_Right_Blocker", new Vector3(13.2f, 5f, 94f), new Vector3(0.4f, 10f, 236f));
             CreateMapCollider(mapRoot, "CompactMap_Back_Blocker", new Vector3(0f, 5f, -30f), new Vector3(28f, 10f, 0.4f));
