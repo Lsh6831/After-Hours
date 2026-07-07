@@ -226,6 +226,12 @@ namespace AfterHours.EditorTools
         private static void CreateEscapeMapLayout()
         {
             GameObject mapRoot = new GameObject("EscapeMap_Kenney");
+            bool useCompactLevelLayout = EditorPrefs.GetBool("AfterHours.UseCompactLevelLayout", true);
+            if (useCompactLevelLayout)
+            {
+                CreateCompactEscapeMapLayout(mapRoot.transform);
+                return;
+            }
 
             // 레벨링 흐름: 시작실 -> 연습실 -> 긴 복도 -> 코어룸 -> 보안 복도 -> 최종 홀.
             CreateFloorGrid(mapRoot.transform, "StartRoomFloor", -4, 4, -8, -4, "floor-panel.fbx");
@@ -339,6 +345,89 @@ namespace AfterHours.EditorTools
             CreateMapCollider(mapRoot.transform, "Outer_Right_Blocker", new Vector3(36f, 5f, 52f), new Vector3(0.4f, 10f, 154f));
             CreateMapCollider(mapRoot.transform, "Outer_Back_Blocker", new Vector3(0f, 5f, -25f), new Vector3(72f, 10f, 0.4f));
             CreateMapCollider(mapRoot.transform, "Outer_Front_Blocker", new Vector3(0f, 5f, 129f), new Vector3(72f, 10f, 0.4f));
+        }
+
+        private static void CreateCompactEscapeMapLayout(Transform mapRoot)
+        {
+            // 큰 홀을 없애고 작은 방을 하나씩 통과하는 탈출 코스로 재구성합니다.
+            CreateCompactRoom(mapRoot, "Room01_CheckIn", "01 CHECK-IN", -2, 2, -8, -6, new Color(0.35f, 0.85f, 1f));
+            CreateCompactRoom(mapRoot, "Room02_GrabPractice", "02 GRAB TEST", -2, 2, -5, -3, new Color(1f, 0.82f, 0.18f));
+            CreateCompactRoom(mapRoot, "Room03_Storage", "03 STORAGE", -2, 2, -2, 0, new Color(1f, 0.48f, 0.12f));
+            CreateCompactRoom(mapRoot, "Room04_AnchorShaft", "04 ANCHOR", -2, 2, 1, 3, new Color(0.25f, 1f, 0.45f));
+            CreateCompactRoom(mapRoot, "Room05_CoreLab", "05 CORE", -2, 2, 4, 6, new Color(0.12f, 0.48f, 1f));
+            CreateCompactRoom(mapRoot, "Room06_SecurityGate", "06 SECURITY", -2, 2, 7, 9, new Color(1f, 0.16f, 0.08f));
+            CreateCompactRoom(mapRoot, "Room07_PuzzleCell", "07 PUZZLE", -2, 2, 10, 12, new Color(1f, 0.25f, 0.65f));
+            CreateCompactRoom(mapRoot, "Room08_Airlock", "08 AIRLOCK", -2, 2, 13, 15, new Color(0.1f, 0.95f, 1f));
+            CreateCompactRoom(mapRoot, "Room09_Decon", "09 DECON", -2, 2, 16, 18, new Color(0.1f, 1f, 0.55f));
+            CreateCompactRoom(mapRoot, "Room10_EscapeBay", "10 ESCAPE", -2, 2, 19, 21, new Color(0.96f, 0.98f, 1f));
+
+            PlaceCompactRoomProps(mapRoot);
+
+            // GrabPack 이동 퍼즐용 앵커입니다. 움직일 수 없는 기둥이라 플레이어가 끌려갑니다.
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-2.8f, 1.8f, -8f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(2.8f, 1.8f, -6f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Shaft_A", new Vector3(0f, 1.8f, 4f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-2.5f, 1.8f, 22f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_B", new Vector3(2.5f, 1.8f, 26f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Airlock_A", new Vector3(0f, 1.8f, 30f));
+
+            // 방 전체를 감싸는 보이지 않는 안전 경계입니다.
+            CreateMapCollider(mapRoot, "CompactMapSafetyFloor", new Vector3(0f, -0.35f, 13f), new Vector3(34f, 0.5f, 64f));
+            CreateMapCollider(mapRoot, "CompactMap_Left_Blocker", new Vector3(-8.2f, 5f, 13f), new Vector3(0.4f, 10f, 64f));
+            CreateMapCollider(mapRoot, "CompactMap_Right_Blocker", new Vector3(8.2f, 5f, 13f), new Vector3(0.4f, 10f, 64f));
+            CreateMapCollider(mapRoot, "CompactMap_Back_Blocker", new Vector3(0f, 5f, -18f), new Vector3(18f, 10f, 0.4f));
+            CreateMapCollider(mapRoot, "CompactMap_Front_Blocker", new Vector3(0f, 5f, 44f), new Vector3(18f, 10f, 0.4f));
+        }
+
+        private static void CreateCompactRoom(Transform parent, string roomName, string labelText, int xMin, int xMax, int zMin, int zMax, Color accentColor)
+        {
+            CreateFloorGrid(parent, $"{roomName}_Floor", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+            CreateCeilingGrid(parent, $"{roomName}_Ceiling", xMin, xMax, zMin, zMax, "floor-panel.fbx");
+
+            float leftX = xMin * 2f - 1f;
+            float rightX = xMax * 2f + 1f;
+            float backZ = zMin * 2f - 1f;
+            float frontZ = zMax * 2f + 1f;
+            float centerX = (leftX + rightX) * 0.5f;
+            float centerZ = (backZ + frontZ) * 0.5f;
+            float width = rightX - leftX;
+            float depth = frontZ - backZ;
+
+            CreateHighWallRun(parent, leftX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_LeftWall");
+            CreateHighWallRun(parent, rightX, backZ, frontZ, true, Mathf.Max(3, zMax - zMin + 2), $"{roomName}_RightWall");
+
+            // 전후면은 완전한 벽 대신 문 프레임을 세워 작은 방이 계속 이어지는 느낌을 만듭니다.
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{roomName}_EntryFrame", new Vector3(centerX, 0f, backZ), Vector3.zero, Vector3.one * 1.45f);
+            PlaceMapModel(parent, "wall-door-wide.fbx", $"{roomName}_ExitFrame", new Vector3(centerX, 0f, frontZ), Vector3.zero, Vector3.one * 1.45f);
+            CreateZoneIdentity(parent, roomName, labelText, new Vector3(centerX, 0f, centerZ), width, depth, accentColor);
+        }
+
+        private static void PlaceCompactRoomProps(Transform parent)
+        {
+            PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-3.2f, 0f, -14.5f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
+            PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-1.5f, 0f, -14.5f), new Vector3(0f, 90f, 0f), Vector3.one);
+
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-3.2f, 0f, -8f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(3.2f, 0f, -6f), new Vector3(0f, -90f, 0f), Vector3.one * 1.3f);
+
+            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-3.4f, 0f, -2f), new Vector3(0f, 90f, 0f), Vector3.one * 1.25f);
+            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(3.4f, 0f, 0f), new Vector3(0f, -90f, 0f), Vector3.one * 1.2f);
+
+            PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-3.6f, 1.4f, 4f), new Vector3(0f, 0f, 90f), Vector3.one * 1.6f);
+            PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(3.9f, 1f, 4f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+
+            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-2.6f, 0f, 10f), Vector3.zero, Vector3.one * 1.25f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(4f, 1f, 10f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+
+            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 19f), Vector3.zero, Vector3.one * 1.25f);
+            PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-4f, 1f, 16f), new Vector3(0f, 90f, 0f), Vector3.one * 1.3f);
+
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-3.4f, 0f, 22f), new Vector3(0f, 90f, 0f), Vector3.one * 1.35f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(3.4f, 0f, 26f), new Vector3(0f, -90f, 0f), Vector3.one * 1.35f);
+
+            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 31f), Vector3.zero, Vector3.one * 1.35f);
+            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-3.2f, 1.4f, 34f), new Vector3(0f, 0f, 90f), Vector3.one * 1.5f);
+            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 43f), Vector3.zero, Vector3.one * 1.5f);
         }
 
         private static void CreateFloorGrid(Transform parent, string prefix, int xMin, int xMax, int zMin, int zMax, string modelName)
@@ -730,7 +819,7 @@ namespace AfterHours.EditorTools
         private static void CreateGrabTargetTestObject()
         {
             GameObject targetRoot = new GameObject("GrabTarget_CharacterG");
-            targetRoot.transform.position = ScaleMapPosition(new Vector3(5f, 1f, -1f));
+            targetRoot.transform.position = ScaleMapPosition(new Vector3(2f, 1f, -8f));
             targetRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
             Rigidbody targetRigidbody = targetRoot.AddComponent<Rigidbody>();
@@ -940,7 +1029,7 @@ namespace AfterHours.EditorTools
 
             GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             core.name = "EnergyCore_Test";
-            core.transform.position = ScaleMapPosition(new Vector3(-6f, 1f, 39f));
+            core.transform.position = ScaleMapPosition(new Vector3(-2.4f, 1f, 10f));
             core.transform.localScale = Vector3.one * 0.7f;
 
             Rigidbody coreRigidbody = core.AddComponent<Rigidbody>();
@@ -1011,8 +1100,8 @@ namespace AfterHours.EditorTools
 
             GameObject door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "SecurityDoor_Core_Test";
-            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 86f));
-            door.transform.localScale = new Vector3(7.5f, 5f, 0.5f);
+            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 13.5f));
+            door.transform.localScale = new Vector3(6.5f, 5f, 0.5f);
             door.GetComponent<Renderer>().sharedMaterial = coreDoorMaterial;
 
             Component securityDoor = door.AddComponent(securityDoorType);
@@ -1025,7 +1114,7 @@ namespace AfterHours.EditorTools
 
             GameObject station = GameObject.CreatePrimitive(PrimitiveType.Cube);
             station.name = "CoreStation_Test";
-            station.transform.position = ScaleMapPosition(new Vector3(-4f, 0.15f, 78f));
+            station.transform.position = ScaleMapPosition(new Vector3(2.4f, 0.15f, 10f));
             station.transform.localScale = new Vector3(2.5f, 0.3f, 2.5f);
             station.GetComponent<Renderer>().sharedMaterial = stationMaterial;
 
@@ -1061,18 +1150,18 @@ namespace AfterHours.EditorTools
 
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            GameObject panelObject = CreateMissionUIRect(canvasObject.transform, "ObjectivePanel", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(980f, 142f), new Vector2(0f, 54f));
+            GameObject panelObject = CreateMissionUIRect(canvasObject.transform, "ObjectivePanel", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(1120f, 176f), new Vector2(0f, 32f));
             Image panelImage = panelObject.AddComponent<Image>();
             panelImage.color = new Color(0.03f, 0.04f, 0.055f, 0.86f);
 
-            GameObject statusObject = CreateMissionUIRect(panelObject.transform, "ObjectiveStatusText", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(170f, 28f), new Vector2(26f, -20f));
-            Text statusText = CreateMissionText(statusObject, 18, FontStyle.Bold, new Color(0.35f, 0.9f, 1f), TextAnchor.MiddleLeft);
+            GameObject statusObject = CreateMissionUIRect(panelObject.transform, "ObjectiveStatusText", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(220f, 26f), new Vector2(32f, -20f));
+            Text statusText = CreateMissionText(statusObject, 18, FontStyle.Bold, new Color(0.35f, 0.9f, 1f), TextAnchor.UpperLeft);
 
-            GameObject titleObject = CreateMissionUIRect(panelObject.transform, "ObjectiveTitleText", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(-220f, 38f), new Vector2(94f, -48f));
+            GameObject titleObject = CreateMissionUIRect(panelObject.transform, "ObjectiveTitleText", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(1050f, 42f), new Vector2(32f, -52f));
             Text titleText = CreateMissionText(titleObject, 28, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
 
-            GameObject descriptionObject = CreateMissionUIRect(panelObject.transform, "ObjectiveDescriptionText", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(-72f, 54f), new Vector2(0f, 30f));
-            Text descriptionText = CreateMissionText(descriptionObject, 22, FontStyle.Normal, new Color(0.86f, 0.9f, 0.95f), TextAnchor.UpperLeft);
+            GameObject descriptionObject = CreateMissionUIRect(panelObject.transform, "ObjectiveDescriptionText", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(1050f, 70f), new Vector2(32f, -100f));
+            Text descriptionText = CreateMissionText(descriptionObject, 21, FontStyle.Normal, new Color(0.86f, 0.9f, 0.95f), TextAnchor.UpperLeft);
 
             UIManager uiManager = canvasObject.AddComponent<UIManager>();
             SerializedObject serializedUi = new SerializedObject(uiManager);
@@ -1092,13 +1181,15 @@ namespace AfterHours.EditorTools
             ConfigureMissionSteps(serializedMission.FindProperty("missionSteps"));
             serializedMission.ApplyModifiedPropertiesWithoutUndo();
 
-            CreateMissionTrigger("MissionTrigger_ReachTraining", "reach_training", missionManager, new Vector3(0f, 1.5f, 1f), new Vector3(22f, 3f, 16f));
-            CreateMissionTrigger("MissionTrigger_ReachStorage", "reach_storage", missionManager, new Vector3(-18f, 1.5f, 2f), new Vector3(10f, 3f, 10f));
-            CreateMissionTrigger("MissionTrigger_ReachCoreLab", "reach_core_lab", missionManager, new Vector3(0f, 1.5f, 40f), new Vector3(26f, 3f, 18f));
-            CreateMissionTrigger("MissionTrigger_ReachSecurity", "reach_security", missionManager, new Vector3(10f, 1.5f, 56f), new Vector3(10f, 3f, 10f));
-            CreateMissionTrigger("MissionTrigger_ReachPuzzle", "reach_puzzle", missionManager, new Vector3(-22f, 1.5f, 75f), new Vector3(10f, 3f, 13f));
-            CreateMissionTrigger("MissionTrigger_ReachAirlock", "reach_airlock", missionManager, new Vector3(0f, 1.5f, 92f), new Vector3(22f, 3f, 10f));
-            CreateMissionTrigger("MissionTrigger_ReachEscape", "reach_escape", missionManager, new Vector3(0f, 1.5f, 114f), new Vector3(30f, 3f, 14f));
+            CreateMissionTrigger("MissionTrigger_ReachGrabPractice", "reach_grab_practice", missionManager, new Vector3(0f, 1.5f, -8f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachStorage", "reach_storage", missionManager, new Vector3(0f, 1.5f, -2f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachAnchorRoom", "reach_anchor_room", missionManager, new Vector3(0f, 1.5f, 4f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachCoreLab", "reach_core_lab", missionManager, new Vector3(0f, 1.5f, 10f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachSecurity", "reach_security", missionManager, new Vector3(0f, 1.5f, 16f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachPuzzle", "reach_puzzle", missionManager, new Vector3(0f, 1.5f, 22f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachAirlock", "reach_airlock", missionManager, new Vector3(0f, 1.5f, 28f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachDecon", "reach_decon", missionManager, new Vector3(0f, 1.5f, 34f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_ReachEscape", "reach_escape", missionManager, new Vector3(0f, 1.5f, 40f), new Vector3(10f, 3f, 6f));
 
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             CoreStation station = coreStation != null ? coreStation.GetComponent<CoreStation>() : null;
@@ -1150,14 +1241,16 @@ namespace AfterHours.EditorTools
         {
             string[,] data =
             {
-                { "reach_training", "훈련 구역으로 이동", "노란색 TRAINING 구역으로 이동해 Grab Pack 조작을 시작하세요.", "훈련 구역에 도착했습니다." },
-                { "reach_storage", "보관실 확인", "주황색 STORAGE 구역으로 이동해 잡을 수 있는 물체와 통로 구조를 확인하세요.", "보관실을 확인했습니다." },
-                { "reach_core_lab", "코어 연구실 진입", "파란색 CORE LAB 구역으로 이동해 Energy Core와 Core Station을 찾으세요.", "코어 연구실에 진입했습니다." },
-                { "charge_core", "Energy Core 충전", "파란 Energy Core를 Grab Pack으로 끌어 Core Station 위에 올리세요.", "Core Station 충전 완료. 보안문이 열렸습니다." },
-                { "reach_security", "보안 구역 통과", "붉은 SECURITY 구역으로 이동해 열린 보안문 너머의 경로를 확인하세요.", "보안 구역을 통과했습니다." },
-                { "reach_puzzle", "최종 퍼즐실 진입", "분홍색 PUZZLE 구역으로 이동해 마지막 Grab Pack 이동 구간을 준비하세요.", "최종 퍼즐실에 도착했습니다." },
-                { "reach_airlock", "Airlock 진입", "청록색 AIRLOCK 구역으로 이동해 탈출 절차를 시작하세요.", "Airlock에 진입했습니다." },
-                { "reach_escape", "Escape Bay 도착", "밝은 ESCAPE 구역까지 이동해 시설을 빠져나가세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
+                { "reach_grab_practice", "02 GRAB TEST로 이동", "앞쪽 작은 방으로 들어가세요. 노란 방에서 좌클릭/우클릭으로 Grab Pack 손을 발사해 봅니다.", "Grab Pack 테스트 방에 도착했습니다." },
+                { "reach_storage", "03 STORAGE 통과", "다음 주황색 보관실로 이동하세요. 좁은 방과 문 프레임을 따라 진행합니다.", "보관실을 통과했습니다." },
+                { "reach_anchor_room", "04 ANCHOR에서 끌려가기 테스트", "초록색 방의 고정 기둥을 2초 이상 잡아 플레이어가 끌려가는지 확인하세요.", "앵커 방에 도착했습니다." },
+                { "reach_core_lab", "05 CORE에서 Energy Core 찾기", "파란 코어 방으로 이동하세요. 파란 공이 Energy Core, 회색 판이 Core Station입니다.", "코어 방에 도착했습니다." },
+                { "charge_core", "Energy Core를 Core Station에 올리기", "Grab Pack으로 파란 Energy Core를 끌어 회색 Core Station 위에 올리세요.", "충전 완료. 다음 보안문이 열렸습니다." },
+                { "reach_security", "06 SECURITY로 진입", "열린 문을 지나 붉은 보안 방으로 들어가세요.", "보안 방을 통과했습니다." },
+                { "reach_puzzle", "07 PUZZLE 방으로 이동", "분홍색 작은 방으로 이동하세요. 이곳은 다음 퍼즐 확장용 방입니다.", "퍼즐 방에 도착했습니다." },
+                { "reach_airlock", "08 AIRLOCK 진입", "청록색 Airlock 방으로 이동해 탈출 절차를 시작하세요.", "Airlock에 진입했습니다." },
+                { "reach_decon", "09 DECON 통과", "녹색 오염 제거 방을 지나 마지막 출구 방으로 이동하세요.", "오염 제거 방을 통과했습니다." },
+                { "reach_escape", "10 ESCAPE 도착", "밝은 마지막 방까지 이동하세요. 여기가 현재 테스트 탈출 지점입니다.", "Escape Bay에 도착했습니다. 탈출 성공!" }
             };
 
             missionSteps.arraySize = data.GetLength(0);
