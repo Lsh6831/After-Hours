@@ -32,6 +32,7 @@ namespace AfterHours.EditorTools
 
             Transform patchRoot = GetOrCreateRoot(PatchRootName).transform;
 
+            RemoveLegacyBackLockDoors();
             ConfigureMissionSteps(missionManager);
             ConfigureExistingMissionTriggers(missionManager);
             ConfigureAreaLabels();
@@ -42,6 +43,7 @@ namespace AfterHours.EditorTools
             CreateSignalLightRoom(patchRoot, missionManager);
             CreateSecondBatteryRoom(patchRoot, missionManager);
             CreateRobotCheckoutRoom(patchRoot, missionManager);
+            ValidateMissionDoorLinks();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -57,6 +59,18 @@ namespace AfterHours.EditorTools
             }
 
             return root.transform;
+        }
+
+        private static void RemoveLegacyBackLockDoors()
+        {
+            for (int i = 1; i <= 9; i++)
+            {
+                GameObject legacyDoor = GameObject.Find($"ClockOut_BackLockDoor_{i:00}");
+                if (legacyDoor != null)
+                {
+                    Object.DestroyImmediate(legacyDoor);
+                }
+            }
         }
 
         private static void ConfigureMissionSteps(MissionManager missionManager)
@@ -328,8 +342,8 @@ namespace AfterHours.EditorTools
                 GameObject backLockObject = GameObject.Find(closeDoorNames[i]);
                 if (backLockObject == null)
                 {
-                    backLockObject = GetOrCreateBackLockDoor(patchRoot, i + 1, openDoorObject.transform.position);
-                    Debug.LogWarning($"{closeDoorNames[i]} 문을 찾지 못해 보조 뒤잠금 문을 생성했습니다.");
+                    Debug.LogError($"{closeDoorNames[i]} 문을 찾지 못해 뒤잠금문 연결을 건너뜁니다.");
+                    continue;
                 }
 
                 SecurityDoor backLockDoor = ConfigureDoor(backLockObject, true, 2.4f, 0.28f);
@@ -370,30 +384,6 @@ namespace AfterHours.EditorTools
                 collider.size = new Vector3(7.2f, 5.2f, 0.8f);
                 collider.center = new Vector3(0f, 2.6f, 0f);
             }
-        }
-
-        private static GameObject GetOrCreateBackLockDoor(Transform parent, int index, Vector3 basePosition)
-        {
-            string objectName = $"ClockOut_BackLockDoor_{index:00}";
-            GameObject door = GameObject.Find(objectName);
-            if (door != null)
-            {
-                return door;
-            }
-
-            door = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            door.name = objectName;
-            door.transform.SetParent(parent);
-            door.transform.position = basePosition + new Vector3(0f, 0f, -0.8f);
-            door.transform.localScale = new Vector3(7.2f, 5.2f, 0.45f);
-
-            Renderer renderer = door.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Material", new Color(0.12f, 0.14f, 0.16f));
-            }
-
-            return door;
         }
 
         private static void CreateMissionDoorController(Transform parent, string objectName, MissionManager missionManager, SecurityDoor securityDoor, string objectiveId)
@@ -442,6 +432,79 @@ namespace AfterHours.EditorTools
             serializedTrigger.FindProperty("doorToClose").objectReferenceValue = doorToClose;
             serializedTrigger.FindProperty("triggerOnce").boolValue = true;
             serializedTrigger.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void ValidateMissionDoorLinks()
+        {
+            string[] openControllers =
+            {
+                "ClockOut_OpenDoor_01",
+                "ClockOut_OpenDoor_02",
+                "ClockOut_OpenDoor_03",
+                "ClockOut_OpenDoor_04",
+                "ClockOut_OpenDoor_05",
+                "ClockOut_OpenDoor_06",
+                "ClockOut_OpenDoor_07",
+                "ClockOut_OpenDoor_08",
+                "ClockOut_OpenDoor_09"
+            };
+
+            string[] closeTriggers =
+            {
+                "ClockOut_CloseBackDoor_01",
+                "ClockOut_CloseBackDoor_02",
+                "ClockOut_CloseBackDoor_03",
+                "ClockOut_CloseBackDoor_04",
+                "ClockOut_CloseBackDoor_05",
+                "ClockOut_CloseBackDoor_06",
+                "ClockOut_CloseBackDoor_07",
+                "ClockOut_CloseBackDoor_08",
+                "ClockOut_CloseBackDoor_09"
+            };
+
+            foreach (string controllerName in openControllers)
+            {
+                MissionDoorController controller = GetComponentByName<MissionDoorController>(controllerName);
+                if (controller == null)
+                {
+                    Debug.LogError($"{controllerName} 열림 문 컨트롤러가 없습니다.");
+                    continue;
+                }
+
+                SerializedObject serializedController = new SerializedObject(controller);
+                SecurityDoor linkedDoor = serializedController.FindProperty("securityDoor").objectReferenceValue as SecurityDoor;
+                string linkedDoorName = linkedDoor != null ? linkedDoor.gameObject.name : string.Empty;
+                if (linkedDoor == null || (!linkedDoorName.StartsWith("door-double-Open") && linkedDoorName != "Door_09_To_10_Normal"))
+                {
+                    Debug.LogError($"{controllerName} 열림 문 참조가 올바르지 않습니다: {linkedDoorName}");
+                }
+            }
+
+            foreach (string triggerName in closeTriggers)
+            {
+                DoorCloseTrigger trigger = GetComponentByName<DoorCloseTrigger>(triggerName);
+                if (trigger == null)
+                {
+                    Debug.LogError($"{triggerName} 닫힘 트리거가 없습니다.");
+                    continue;
+                }
+
+                SerializedObject serializedTrigger = new SerializedObject(trigger);
+                SecurityDoor linkedDoor = serializedTrigger.FindProperty("doorToClose").objectReferenceValue as SecurityDoor;
+                string linkedDoorName = linkedDoor != null ? linkedDoor.gameObject.name : string.Empty;
+                if (linkedDoor == null || !linkedDoorName.StartsWith("door-double-closed"))
+                {
+                    Debug.LogError($"{triggerName} 닫힘 문 참조가 올바르지 않습니다: {linkedDoorName}");
+                }
+            }
+
+            Debug.Log("퇴근 시나리오 문 연결 검증 완료");
+        }
+
+        private static T GetComponentByName<T>(string objectName) where T : Component
+        {
+            GameObject targetObject = GameObject.Find(objectName);
+            return targetObject != null ? targetObject.GetComponent<T>() : null;
         }
 
         private static void CreateSignalLightRoom(Transform parent, MissionManager missionManager)
