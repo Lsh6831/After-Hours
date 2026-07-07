@@ -452,6 +452,7 @@ namespace AfterHours.EditorTools
         private static void PlaceCompactObjectivePads(Transform parent)
         {
             // 방 입구가 아니라 실제 목표 지점에 작은 발광 패드를 둡니다.
+            CreateObjectivePad(parent, "ObjectivePad_CheckInConsole", new Vector3(-3.2f, 0.08f, -14.5f), new Color(0.35f, 0.85f, 1f));
             CreateObjectivePad(parent, "ObjectivePad_GrabTarget", new Vector3(2.2f, 0.08f, -8.2f), new Color(1f, 0.82f, 0.18f));
             CreateObjectivePad(parent, "ObjectivePad_StorageCrate", new Vector3(-3.1f, 0.08f, -1.6f), new Color(1f, 0.48f, 0.12f));
             CreateObjectivePad(parent, "ObjectivePad_AnchorExit", new Vector3(0f, 0.08f, 6.1f), new Color(0.25f, 1f, 0.45f));
@@ -1274,6 +1275,7 @@ namespace AfterHours.EditorTools
             ConfigureMissionSteps(serializedMission.FindProperty("missionSteps"));
             serializedMission.ApplyModifiedPropertiesWithoutUndo();
 
+            CreateMissionTrigger("MissionTrigger_CheckInConsolePad", "check_in_console", missionManager, new Vector3(-3.2f, 1.2f, -14.5f), new Vector3(2.2f, 2.4f, 2.2f));
             CreateMissionTrigger("MissionTrigger_GrabTargetPad", "reach_grab_practice", missionManager, new Vector3(2.2f, 1.2f, -8.2f), new Vector3(2.2f, 2.4f, 2.2f));
             CreateMissionTrigger("MissionTrigger_StorageCratePad", "reach_storage", missionManager, new Vector3(-3.1f, 1.2f, -1.6f), new Vector3(2.2f, 2.4f, 2.2f));
             CreateMissionTrigger("MissionTrigger_AnchorExitPad", "reach_anchor_room", missionManager, new Vector3(0f, 1.2f, 6.1f), new Vector3(2.4f, 2.4f, 2.2f));
@@ -1334,6 +1336,7 @@ namespace AfterHours.EditorTools
         {
             string[,] data =
             {
+                { "check_in_console", "01 CHECK-IN: 근무 종료 확인", "시작 방 왼쪽 콘솔 앞 목표 패드로 이동하세요. 폐쇄된 시설에 갇혔다는 상황을 확인합니다.", "체크인 콘솔 확인 완료. 다음 방으로 이동하세요." },
                 { "reach_grab_practice", "02 GRAB TEST: 타겟 확인", "노란 방 오른쪽의 목표 패드까지 이동하세요. 앞의 캐릭터 타겟에 Grab Pack 손을 발사해 봅니다.", "Grab Pack 테스트 지점을 확인했습니다." },
                 { "reach_storage", "03 STORAGE: 보관함 확인", "주황색 보관실 왼쪽 컨테이너 앞의 목표 패드까지 이동하세요.", "보관함 확인 완료." },
                 { "reach_anchor_room", "04 ANCHOR: 출구까지 끌려가기", "초록색 방의 고정 기둥을 잡고 방 앞쪽 목표 패드까지 이동하세요.", "앵커 이동 구간을 통과했습니다." },
