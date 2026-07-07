@@ -131,7 +131,7 @@ namespace AfterHours.EditorTools
             GameObject grabTarget = GameObject.Find("GrabTarget_CharacterG");
             GameObject energyCore = GameObject.Find("EnergyCore_Test");
             GameObject coreStation = GameObject.Find("CoreStation_Test");
-            GameObject securityDoor = GameObject.Find("SecurityDoor_Core_Test");
+            GameObject securityDoor = GameObject.Find("door-double-Open_05_To_06");
             GameObject escapeMap = GameObject.Find("EscapeMap_Kenney");
             GameObject missionManager = GameObject.Find("MissionManager");
             GameObject missionCanvas = GameObject.Find("MissionCanvas");
@@ -359,34 +359,34 @@ namespace AfterHours.EditorTools
 
         private static void CreateCompactEscapeMapLayout(Transform mapRoot)
         {
-            // 큰 홀을 없애고 작은 방을 하나씩 통과하는 탈출 코스로 재구성합니다.
+            // 큰 홀을 없애고 작은 방을 하나씩 통과하는 퇴근 점검 코스로 재구성합니다.
             CreateCompactRoom(mapRoot, "Room01_CheckIn", "01 CHECK-IN", -4, 4, -10, -4, new Color(0.35f, 0.85f, 1f));
             CreateConnectorCorridor(mapRoot, "Corridor_01_To_02", -1, 1, -3, 1);
-            CreateCompactRoom(mapRoot, "Room02_GrabPractice", "02 GRAB TEST", -4, 4, 2, 8, new Color(1f, 0.82f, 0.18f));
+            CreateCompactRoom(mapRoot, "Room02_StorageJump", "02 STORAGE", -4, 4, 2, 8, new Color(1f, 0.48f, 0.12f));
             CreateConnectorCorridor(mapRoot, "Corridor_02_To_03", -1, 1, 9, 13);
-            CreateCompactRoom(mapRoot, "Room03_Storage", "03 STORAGE", -4, 4, 14, 20, new Color(1f, 0.48f, 0.12f));
+            CreateCompactRoom(mapRoot, "Room03_GrabGear", "03 GRAB GEAR", -4, 4, 14, 20, new Color(1f, 0.82f, 0.18f));
             CreateConnectorCorridor(mapRoot, "Corridor_03_To_04", -1, 1, 21, 25);
             CreateCompactRoom(mapRoot, "Room04_AnchorShaft", "04 ANCHOR", -4, 4, 26, 32, new Color(0.25f, 1f, 0.45f));
             CreateConnectorCorridor(mapRoot, "Corridor_04_To_05", -1, 1, 33, 37);
-            CreateCompactRoom(mapRoot, "Room05_CoreLab", "05 CORE", -4, 4, 38, 44, new Color(0.12f, 0.48f, 1f));
+            CreateCompactRoom(mapRoot, "Room05_BatterySwap", "05 BATTERY", -4, 4, 38, 44, new Color(0.12f, 0.48f, 1f));
             CreateConnectorCorridor(mapRoot, "Corridor_05_To_06", -1, 1, 45, 49);
-            CreateCompactRoom(mapRoot, "Room06_SecurityGate", "06 SECURITY", -4, 4, 50, 56, new Color(1f, 0.16f, 0.08f));
+            CreateCompactRoom(mapRoot, "Room06_SignalLight", "06 SIGNAL", -4, 4, 50, 56, new Color(1f, 0.16f, 0.08f));
             CreateConnectorCorridor(mapRoot, "Corridor_06_To_07", -1, 1, 57, 61);
-            CreateCompactRoom(mapRoot, "Room07_PuzzleCell", "07 PUZZLE", -4, 4, 62, 68, new Color(1f, 0.25f, 0.65f));
+            CreateCompactRoom(mapRoot, "Room07_BatteryTrap", "07 CORE + HOOK", -4, 4, 62, 68, new Color(1f, 0.25f, 0.65f));
             CreateConnectorCorridor(mapRoot, "Corridor_07_To_08", -1, 1, 69, 73);
-            CreateCompactRoom(mapRoot, "Room08_Airlock", "08 AIRLOCK", -4, 4, 74, 80, new Color(0.1f, 0.95f, 1f));
+            CreateCompactRoom(mapRoot, "Room08_RobotCheckout", "08 ROBOT OUT", -4, 4, 74, 80, new Color(0.1f, 0.95f, 1f));
             CreateConnectorCorridor(mapRoot, "Corridor_08_To_09", -1, 1, 81, 85);
-            CreateCompactRoom(mapRoot, "Room09_Decon", "09 DECON", -4, 4, 86, 92, new Color(0.1f, 1f, 0.55f));
+            CreateCompactRoom(mapRoot, "Room09_FinalMix", "09 FINAL MIX", -4, 4, 86, 92, new Color(0.1f, 1f, 0.55f));
             CreateConnectorCorridor(mapRoot, "Corridor_09_To_10", -1, 1, 93, 97);
-            CreateCompactRoom(mapRoot, "Room10_EscapeBay", "10 ESCAPE", -4, 4, 98, 104, new Color(0.96f, 0.98f, 1f));
+            CreateCompactRoom(mapRoot, "Room10_ClockOut", "10 CLOCK OUT", -4, 4, 98, 104, new Color(0.96f, 0.98f, 1f));
 
             PlaceCompactRoomProps(mapRoot);
             PlaceCompactDoorSequence(mapRoot);
             PlaceCompactObjectivePads(mapRoot);
 
             // GrabPack 이동 퍼즐용 앵커입니다. 움직일 수 없는 기둥이라 플레이어가 끌려갑니다.
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-5.8f, 1.8f, 8f));
-            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(5.8f, 1.8f, 12f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-5.8f, 1.8f, 32f));
+            CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Right", new Vector3(5.8f, 1.8f, 36f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Shaft_A", new Vector3(0f, 1.8f, 58f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Security_Exit", new Vector3(0f, 1.8f, 110f));
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Puzzle_A", new Vector3(-5.8f, 1.8f, 128f));
@@ -428,58 +428,50 @@ namespace AfterHours.EditorTools
             PlaceMapModel(parent, "computer-system.fbx", "Room01_CheckIn_Console", new Vector3(-6f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2.8f);
             PlaceMapModel(parent, "chair.fbx", "Room01_CheckIn_Chair", new Vector3(-2.8f, 0f, -17f), new Vector3(0f, 90f, 0f), Vector3.one * 2.1f);
 
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_A", new Vector3(-6f, 0f, 8f), new Vector3(0f, 90f, 0f), Vector3.one * 2.4f);
-            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Practice_Barrier_B", new Vector3(6f, 0f, 12f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
+            PlaceMapModel(parent, "container-wide.fbx", "Room02_Storage_Container_A", new Vector3(-6.2f, 0f, 8f), new Vector3(0f, 90f, 0f), Vector3.one * 2.9f);
+            PlaceMapModel(parent, "container-tall.fbx", "Room02_Storage_Container_B", new Vector3(6.2f, 0f, 12f), new Vector3(0f, -90f, 0f), Vector3.one * 2.7f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Room02_Storage_JumpBarrier_A", new Vector3(0f, 0f, 7.5f), new Vector3(0f, 90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "container-wide.fbx", "Room03_Storage_Container_A", new Vector3(-6.2f, 0f, 33f), new Vector3(0f, 90f, 0f), Vector3.one * 2.7f);
-            PlaceMapModel(parent, "container-tall.fbx", "Room03_Storage_Container_B", new Vector3(6.2f, 0f, 36f), new Vector3(0f, -90f, 0f), Vector3.one * 2.5f);
+            PlaceMapModel(parent, "table-display.fbx", "Room03_GrabGear_Table", new Vector3(-5.8f, 0f, 32f), Vector3.zero, Vector3.one * 2.6f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Room03_GrabGear_StatusDisplay", new Vector3(7.4f, 1.45f, 34f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
             PlaceMapModel(parent, "pipe-bend.fbx", "Room04_Anchor_Pipe_A", new Vector3(-6.6f, 1.8f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2.8f);
             PlaceMapModel(parent, "wall-switch.fbx", "Room04_Anchor_Switch", new Vector3(7.4f, 1.35f, 58f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_Core_DisplayTable", new Vector3(-5.2f, 0f, 82f), Vector3.zero, Vector3.one * 2.6f);
-            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_Core_StatusDisplay", new Vector3(7.4f, 1.45f, 82f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
+            PlaceMapModel(parent, "table-display-planet.fbx", "Room05_BatterySwap_DisplayTable", new Vector3(-5.2f, 0f, 82f), Vector3.zero, Vector3.one * 2.6f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Room05_BatterySwap_StatusDisplay", new Vector3(7.4f, 1.45f, 82f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "door-double-closed.fbx", "Room06_Security_DoorProp", new Vector3(0f, 0f, 112f), Vector3.zero, Vector3.one * 2.5f);
             PlaceMapModel(parent, "display-wall.fbx", "Room06_Security_AlertDisplay", new Vector3(-7.4f, 1.45f, 106f), new Vector3(0f, 90f, 0f), Vector3.one * 2.4f);
+            PlaceMapModel(parent, "wall-switch.fbx", "Room06_Signal_WaitSwitch", new Vector3(7.4f, 1.35f, 108f), new Vector3(0f, -90f, 0f), Vector3.one * 2.4f);
 
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_A", new Vector3(-6.4f, 0f, 128f), new Vector3(0f, 90f, 0f), Vector3.one * 2.6f);
-            PlaceMapModel(parent, "structure-panel.fbx", "Room07_Puzzle_Panel_B", new Vector3(6.4f, 0f, 136f), new Vector3(0f, -90f, 0f), Vector3.one * 2.6f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_A", new Vector3(-3.5f, 0f, 132f), new Vector3(0f, 90f, 0f), Vector3.one * 2.2f);
-            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_Puzzle_LowBarrier_B", new Vector3(3.5f, 0f, 132f), new Vector3(0f, -90f, 0f), Vector3.one * 2.2f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_BatteryTrap_Panel_A", new Vector3(-6.4f, 0f, 128f), new Vector3(0f, 90f, 0f), Vector3.one * 2.6f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Room07_BatteryTrap_Panel_B", new Vector3(6.4f, 0f, 136f), new Vector3(0f, -90f, 0f), Vector3.one * 2.6f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_BatteryTrap_LowBarrier_A", new Vector3(-3.5f, 0f, 132f), new Vector3(0f, 90f, 0f), Vector3.one * 2.2f);
+            PlaceMapModel(parent, "structure-barrier.fbx", "Room07_BatteryTrap_LowBarrier_B", new Vector3(3.5f, 0f, 132f), new Vector3(0f, -90f, 0f), Vector3.one * 2.2f);
 
-            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_Airlock_Banner", new Vector3(0f, 0f, 160f), Vector3.zero, Vector3.one * 2.6f);
-            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_Decon_Ring_A", new Vector3(-6.2f, 1.9f, 178f), new Vector3(0f, 0f, 90f), Vector3.one * 2.8f);
-            PlaceMapModel(parent, "door-double.fbx", "Room10_Escape_FinalDoor", new Vector3(0f, 0f, 210f), Vector3.zero, Vector3.one * 3f);
+            PlaceMapModel(parent, "wall-door-banner.fbx", "Room08_RobotCheckout_WindowFrame", new Vector3(7.8f, 0f, 160f), new Vector3(0f, -90f, 0f), Vector3.one * 2.6f);
+            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Room09_FinalMix_LightRing", new Vector3(-6.2f, 1.9f, 178f), new Vector3(0f, 0f, 90f), Vector3.one * 2.8f);
+            PlaceMapModel(parent, "computer-system.fbx", "Room10_ClockOut_Machine", new Vector3(0f, 0f, 206f), new Vector3(0f, 180f, 0f), Vector3.one * 2.8f);
         }
 
         private static void PlaceCompactDoorSequence(Transform parent)
         {
-            // 일반 문은 통로를 막지 않는 얇은 시각 표시로 두고, 실제로 열리는 문은 Core Station과 연결합니다.
-            CreateDoorPanel(parent, "Door_01_To_02_Normal", new Vector3(0f, 1.6f, -3f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_02_To_03_Normal", new Vector3(0f, 1.6f, 21f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_03_To_04_Normal", new Vector3(0f, 1.6f, 45f), new Color(0.25f, 0.32f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_04_To_05_Normal", new Vector3(0f, 1.6f, 69f), new Color(0.25f, 0.32f, 0.38f), false);
-
-            CreateDoorPanel(parent, "Door_06_To_07_AfterCore", new Vector3(0f, 1.6f, 117f), new Color(0.42f, 0.08f, 0.1f), false);
-            CreateDoorPanel(parent, "Door_07_To_08_Normal", new Vector3(0f, 1.6f, 141f), new Color(0.32f, 0.16f, 0.38f), false);
-            CreateDoorPanel(parent, "Door_08_To_09_Normal", new Vector3(0f, 1.6f, 165f), new Color(0.08f, 0.38f, 0.42f), false);
-            CreateDoorPanel(parent, "Door_09_To_10_Normal", new Vector3(0f, 1.6f, 189f), new Color(0.08f, 0.42f, 0.25f), false);
+            // 실제 미션 문은 MissionManager가 만들어진 뒤 연결합니다. 여기서는 문 프레임만 유지합니다.
         }
 
         private static void PlaceCompactObjectivePads(Transform parent)
         {
-            // 방 입구가 아니라 실제 목표 지점에 작은 발광 패드를 둡니다.
+            // 방 입구가 아니라 실제 점검 지점에 작은 발광 패드를 둡니다.
             CreateObjectivePad(parent, "ObjectivePad_CheckInConsole", new Vector3(-6f, 0.08f, -17f), new Color(0.35f, 0.85f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_GrabTarget", new Vector3(4.8f, 0.08f, 8f), new Color(1f, 0.82f, 0.18f));
-            CreateObjectivePad(parent, "ObjectivePad_StorageCrate", new Vector3(-6f, 0.08f, 33f), new Color(1f, 0.48f, 0.12f));
+            CreateObjectivePad(parent, "ObjectivePad_StorageCheck", new Vector3(-6f, 0.08f, 8f), new Color(1f, 0.48f, 0.12f));
+            CreateObjectivePad(parent, "ObjectivePad_GrabGear", new Vector3(4.8f, 0.08f, 32f), new Color(1f, 0.82f, 0.18f));
             CreateObjectivePad(parent, "ObjectivePad_AnchorExit", new Vector3(0f, 0.08f, 66f), new Color(0.25f, 1f, 0.45f));
-            CreateObjectivePad(parent, "ObjectivePad_CorePickup", new Vector3(-5.2f, 0.08f, 82f), new Color(0.12f, 0.48f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_SecurityConsole", new Vector3(-6.2f, 0.08f, 106f), new Color(1f, 0.16f, 0.08f));
-            CreateObjectivePad(parent, "ObjectivePad_PuzzleExit", new Vector3(0f, 0.08f, 140f), new Color(1f, 0.25f, 0.65f));
-            CreateObjectivePad(parent, "ObjectivePad_AirlockConsole", new Vector3(5.8f, 0.08f, 154f), new Color(0.1f, 0.95f, 1f));
-            CreateObjectivePad(parent, "ObjectivePad_DeconRing", new Vector3(-6f, 0.08f, 178f), new Color(0.1f, 1f, 0.55f));
-            CreateObjectivePad(parent, "ObjectivePad_EscapeDoor", new Vector3(0f, 0.08f, 206f), new Color(0.96f, 0.98f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_BatterySwap", new Vector3(5.2f, 0.08f, 82f), new Color(0.12f, 0.48f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_SignalExit", new Vector3(0f, 0.08f, 114f), new Color(1f, 0.16f, 0.08f));
+            CreateObjectivePad(parent, "ObjectivePad_BatteryTrapSwap", new Vector3(5.2f, 0.08f, 130f), new Color(1f, 0.25f, 0.65f));
+            CreateObjectivePad(parent, "ObjectivePad_RobotCheckout", new Vector3(7.2f, 0.08f, 154f), new Color(0.1f, 0.95f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_FinalMixExit", new Vector3(0f, 0.08f, 184f), new Color(0.1f, 1f, 0.55f));
+            CreateObjectivePad(parent, "ObjectivePad_ClockOut", new Vector3(0f, 0.08f, 206f), new Color(0.96f, 0.98f, 1f));
         }
 
         private static void CreateObjectivePad(Transform parent, string objectName, Vector3 position, Color color)
@@ -931,7 +923,7 @@ namespace AfterHours.EditorTools
         private static void CreateGrabTargetTestObject()
         {
             GameObject targetRoot = new GameObject("GrabTarget_CharacterG");
-            targetRoot.transform.position = ScaleMapPosition(new Vector3(4.8f, 1f, 8f));
+            targetRoot.transform.position = ScaleMapPosition(new Vector3(4.8f, 1f, 32f));
             targetRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
             Rigidbody targetRigidbody = targetRoot.AddComponent<Rigidbody>();
@@ -1195,34 +1187,35 @@ namespace AfterHours.EditorTools
             serializedEnergyCore.FindProperty("activeLightIntensity").floatValue = 4f;
             serializedEnergyCore.FindProperty("inactiveLightIntensity").floatValue = 0f;
             serializedEnergyCore.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject depletedCore = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            depletedCore.name = "DepletedCore_InStation";
+            depletedCore.transform.position = ScaleMapPosition(new Vector3(5.2f, 1.05f, 82f));
+            depletedCore.transform.localScale = Vector3.one * 1.15f;
+
+            Renderer depletedRenderer = depletedCore.GetComponent<Renderer>();
+            if (depletedRenderer != null)
+            {
+                depletedRenderer.sharedMaterial = CreateSceneMaterial("Depleted_Core_Grey_Material", Color.gray);
+            }
+
+            Collider depletedCollider = depletedCore.GetComponent<Collider>();
+            if (depletedCollider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(depletedCollider);
+            }
         }
 
         private static void CreateCoreStationTestObjects()
         {
             Type coreStationType = Type.GetType("CoreStation, Assembly-CSharp");
-            Type securityDoorType = Type.GetType("SecurityDoor, Assembly-CSharp");
-            if (coreStationType == null || securityDoorType == null)
+            if (coreStationType == null)
             {
                 Debug.LogError("CoreStation 테스트에 필요한 타입을 찾을 수 없습니다.");
                 return;
             }
 
             Material stationMaterial = CreateSceneMaterial("Station_Grey_Material", Color.gray);
-            Material coreDoorMaterial = CreateSceneMaterial("Core_Door_Blue_Material", new Color(0.15f, 0.35f, 0.8f));
-
-            GameObject door = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            door.name = "SecurityDoor_Core_Test";
-            door.transform.position = ScaleMapPosition(new Vector3(0f, 1.7f, 93f));
-            door.transform.localScale = new Vector3(6.4f, 4.2f, 0.35f);
-            door.GetComponent<Renderer>().sharedMaterial = coreDoorMaterial;
-
-            Component securityDoor = door.AddComponent(securityDoorType);
-            SerializedObject serializedDoor = new SerializedObject(securityDoor);
-            serializedDoor.FindProperty("doorTransform").objectReferenceValue = door.transform;
-            serializedDoor.FindProperty("openAudio").objectReferenceValue = null;
-            serializedDoor.FindProperty("openOffset").vector3Value = new Vector3(0f, 4f, 0f);
-            serializedDoor.FindProperty("openDuration").floatValue = 1.5f;
-            serializedDoor.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject station = GameObject.CreatePrimitive(PrimitiveType.Cube);
             station.name = "CoreStation_Test";
@@ -1243,7 +1236,7 @@ namespace AfterHours.EditorTools
             Component coreStation = station.AddComponent(coreStationType);
             SerializedObject serializedStation = new SerializedObject(coreStation);
             serializedStation.FindProperty("stationHoldPoint").objectReferenceValue = holdPoint.transform;
-            serializedStation.FindProperty("linkedDoor").objectReferenceValue = securityDoor;
+            serializedStation.FindProperty("linkedDoor").objectReferenceValue = null;
             serializedStation.FindProperty("chargeTime").floatValue = 3f;
             serializedStation.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -1294,15 +1287,20 @@ namespace AfterHours.EditorTools
             serializedMission.ApplyModifiedPropertiesWithoutUndo();
 
             CreateMissionTrigger("MissionTrigger_CheckInConsolePad", "check_in_console", missionManager, new Vector3(-6f, 1.2f, -17f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_GrabTargetPad", "reach_grab_practice", missionManager, new Vector3(4.8f, 1.2f, 8f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_StorageCratePad", "reach_storage", missionManager, new Vector3(-6f, 1.2f, 33f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_AnchorExitPad", "reach_anchor_room", missionManager, new Vector3(0f, 1.2f, 66f), new Vector3(4.4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_CorePickupPad", "reach_core_lab", missionManager, new Vector3(-5.2f, 1.2f, 82f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_SecurityConsolePad", "reach_security", missionManager, new Vector3(-6.2f, 1.2f, 106f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_PuzzleExitPad", "reach_puzzle", missionManager, new Vector3(0f, 1.2f, 140f), new Vector3(4.4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_AirlockConsolePad", "reach_airlock", missionManager, new Vector3(5.8f, 1.2f, 154f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_DeconRingPad", "reach_decon", missionManager, new Vector3(-6f, 1.2f, 178f), new Vector3(4f, 2.4f, 4f));
-            CreateMissionTrigger("MissionTrigger_EscapeDoorPad", "reach_escape", missionManager, new Vector3(0f, 1.2f, 206f), new Vector3(4.8f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_StorageCheckPad", "check_storage", missionManager, new Vector3(-6f, 1.2f, 8f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_GrabGearPad", "test_grab_gear", missionManager, new Vector3(4.8f, 1.2f, 32f), new Vector3(4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_AnchorExitPad", "use_anchor", missionManager, new Vector3(0f, 1.2f, 66f), new Vector3(4.4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_FinalMixExitPad", "clear_final_mix", missionManager, new Vector3(0f, 1.2f, 184f), new Vector3(4.4f, 2.4f, 4f));
+            CreateMissionTrigger("MissionTrigger_ClockOutPad", "clock_out", missionManager, new Vector3(0f, 1.2f, 206f), new Vector3(4.8f, 2.4f, 4f));
+
+            Transform mapRoot = GameObject.Find("EscapeMap_Kenney")?.transform;
+            if (mapRoot != null)
+            {
+                CreateMissionDoorSequence(mapRoot, missionManager);
+                CreateWarningLightGateObject(mapRoot, missionManager);
+                CreateRobotCheckoutObjects(mapRoot, missionManager);
+                CreateSecondBatterySwapObjects(mapRoot, missionManager);
+            }
 
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             CoreStation station = coreStation != null ? coreStation.GetComponent<CoreStation>() : null;
@@ -1310,7 +1308,7 @@ namespace AfterHours.EditorTools
             {
                 SerializedObject serializedStation = new SerializedObject(station);
                 serializedStation.FindProperty("missionManager").objectReferenceValue = missionManager;
-                serializedStation.FindProperty("completionObjectiveId").stringValue = "charge_core";
+                serializedStation.FindProperty("completionObjectiveId").stringValue = "swap_battery_01";
                 serializedStation.ApplyModifiedPropertiesWithoutUndo();
             }
         }
@@ -1353,6 +1351,7 @@ namespace AfterHours.EditorTools
             CreateCheckpointTrigger("Checkpoint_10_Escape", "SpawnPoint_10_Escape", new Vector3(0f, 1.05f, 196f), respawnManager, null, new Color(0.96f, 0.98f, 1f));
 
             CreateKillZone(respawnManager);
+            ConnectWarningLightGates(respawnManager);
         }
 
         private static void ConfigureRespawnManager(CheckpointRespawnManager respawnManager, GameObject player, Transform firstSpawnPoint, Image fadeImage, Text wakeText)
@@ -1431,6 +1430,296 @@ namespace AfterHours.EditorTools
             serializedKillZone.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private static void ConnectWarningLightGates(CheckpointRespawnManager respawnManager)
+        {
+            WarningLightGate[] gates = UnityEngine.Object.FindObjectsByType<WarningLightGate>(FindObjectsInactive.Include);
+            foreach (WarningLightGate gate in gates)
+            {
+                SerializedObject serializedGate = new SerializedObject(gate);
+                serializedGate.FindProperty("respawnManager").objectReferenceValue = respawnManager;
+                serializedGate.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+
+        private static void CreateMissionDoorSequence(Transform parent, MissionManager missionManager)
+        {
+            string[] objectiveIds =
+            {
+                "check_in_console",
+                "check_storage",
+                "test_grab_gear",
+                "use_anchor",
+                "swap_battery_01",
+                "pass_warning_lights",
+                "swap_battery_02",
+                "checkout_robot",
+                "clear_final_mix"
+            };
+
+            float[] doorZ =
+            {
+                -3f,
+                21f,
+                45f,
+                69f,
+                93f,
+                117f,
+                141f,
+                165f,
+                189f
+            };
+
+            float[] closeTriggerZ =
+            {
+                4f,
+                28f,
+                52f,
+                76f,
+                100f,
+                124f,
+                148f,
+                172f,
+                196f
+            };
+
+            for (int i = 0; i < objectiveIds.Length; i++)
+            {
+                string doorIndex = (i + 1).ToString("00");
+                SecurityDoor openDoor = CreateMissionDoor(parent, $"door-double-Open_{doorIndex}_To_{(i + 2):00}", "door-double.fbx", new Vector3(0f, 0f, doorZ[i]), false, 2.4f, 0.35f);
+                CreateMissionDoorController($"MissionDoorController_{doorIndex}", missionManager, openDoor, objectiveIds[i]);
+
+                SecurityDoor backDoor = CreateMissionDoor(parent, $"door-double-closed_{doorIndex}_BackLock", "door-double-closed.fbx", new Vector3(0f, 0f, doorZ[i] - 0.35f), true, 2.4f, 0.28f);
+                CreateDoorCloseTrigger($"DoorCloseTrigger_{doorIndex}", backDoor, new Vector3(0f, 1.4f, closeTriggerZ[i]), new Vector3(7f, 3f, 4f));
+            }
+        }
+
+        private static SecurityDoor CreateMissionDoor(Transform parent, string objectName, string modelName, Vector3 position, bool startOpened, float openDuration, float closeDuration)
+        {
+            GameObject doorRoot = new GameObject(objectName);
+            doorRoot.transform.SetParent(parent);
+            doorRoot.transform.position = ScaleMapPosition(position);
+            doorRoot.transform.rotation = Quaternion.identity;
+
+            GameObject visual = PlaceMapModel(doorRoot.transform, modelName, $"{objectName}_Visual", Vector3.zero, Vector3.zero, Vector3.one * 3f);
+            if (visual != null)
+            {
+                visual.transform.localPosition = Vector3.zero;
+                visual.transform.localRotation = Quaternion.identity;
+            }
+
+            BoxCollider blocker = doorRoot.AddComponent<BoxCollider>();
+            blocker.size = new Vector3(7.2f, 5.2f, 0.8f);
+            blocker.center = new Vector3(0f, 2.6f, 0f);
+
+            SecurityDoor securityDoor = doorRoot.AddComponent<SecurityDoor>();
+            SerializedObject serializedDoor = new SerializedObject(securityDoor);
+            serializedDoor.FindProperty("doorTransform").objectReferenceValue = doorRoot.transform;
+            serializedDoor.FindProperty("openOffset").vector3Value = new Vector3(0f, 8f, 0f);
+            serializedDoor.FindProperty("openDuration").floatValue = openDuration;
+            serializedDoor.FindProperty("closeDuration").floatValue = closeDuration;
+            serializedDoor.FindProperty("startOpened").boolValue = startOpened;
+            serializedDoor.ApplyModifiedPropertiesWithoutUndo();
+
+            return securityDoor;
+        }
+
+        private static void CreateMissionDoorController(string objectName, MissionManager missionManager, SecurityDoor securityDoor, string objectiveId)
+        {
+            GameObject controllerObject = new GameObject(objectName);
+            MissionDoorController controller = controllerObject.AddComponent<MissionDoorController>();
+            SerializedObject serializedController = new SerializedObject(controller);
+            serializedController.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedController.FindProperty("securityDoor").objectReferenceValue = securityDoor;
+            serializedController.FindProperty("openObjectiveId").stringValue = objectiveId;
+            serializedController.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateDoorCloseTrigger(string objectName, SecurityDoor doorToClose, Vector3 center, Vector3 size)
+        {
+            GameObject triggerObject = new GameObject(objectName);
+            triggerObject.transform.position = ScaleMapPosition(center);
+
+            BoxCollider boxCollider = triggerObject.AddComponent<BoxCollider>();
+            boxCollider.isTrigger = true;
+            boxCollider.size = new Vector3(size.x * LayoutScale, size.y, size.z * LayoutScale);
+
+            DoorCloseTrigger trigger = triggerObject.AddComponent<DoorCloseTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("doorToClose").objectReferenceValue = doorToClose;
+            serializedTrigger.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateWarningLightGateObject(Transform parent, MissionManager missionManager)
+        {
+            GameObject gateObject = new GameObject("Room06_SignalLight_Gate");
+            gateObject.transform.SetParent(parent);
+            gateObject.transform.position = ScaleMapPosition(new Vector3(0f, 1.5f, 112f));
+
+            BoxCollider triggerCollider = gateObject.AddComponent<BoxCollider>();
+            triggerCollider.isTrigger = true;
+            triggerCollider.size = new Vector3(8f * LayoutScale, 3f, 5f * LayoutScale);
+
+            GameObject lightBar = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            lightBar.name = "Room06_SignalLight_BlinkingBar";
+            lightBar.transform.SetParent(parent);
+            lightBar.transform.position = ScaleMapPosition(new Vector3(0f, CeilingHeight - 0.5f, 112f));
+            lightBar.transform.localScale = new Vector3(7f, 0.25f, 0.45f);
+
+            Renderer lightRenderer = lightBar.GetComponent<Renderer>();
+            if (lightRenderer != null)
+            {
+                lightRenderer.sharedMaterial = CreateSceneMaterial("SignalLight_Blink_Material", new Color(1f, 0.1f, 0.05f));
+            }
+
+            Collider lightCollider = lightBar.GetComponent<Collider>();
+            if (lightCollider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(lightCollider);
+            }
+
+            GameObject lightObject = new GameObject("Room06_SignalLight_PointLight");
+            lightObject.transform.SetParent(parent);
+            lightObject.transform.position = ScaleMapPosition(new Vector3(0f, CeilingHeight - 1.2f, 112f));
+            Light warningLight = lightObject.AddComponent<Light>();
+            warningLight.type = LightType.Point;
+            warningLight.color = new Color(1f, 0.1f, 0.05f);
+            warningLight.range = 18f;
+            warningLight.intensity = 3f;
+
+            WarningLightGate gate = gateObject.AddComponent<WarningLightGate>();
+            SerializedObject serializedGate = new SerializedObject(gate);
+            serializedGate.FindProperty("warningLight").objectReferenceValue = warningLight;
+            serializedGate.FindProperty("warningRenderer").objectReferenceValue = lightRenderer;
+            serializedGate.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedGate.FindProperty("completionObjectiveId").stringValue = "pass_warning_lights";
+            serializedGate.FindProperty("lightOnDuration").floatValue = 1.4f;
+            serializedGate.FindProperty("lightOffDuration").floatValue = 1.2f;
+            serializedGate.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateRobotCheckoutObjects(Transform parent, MissionManager missionManager)
+        {
+            GameObject robotRoot = new GameObject("Overtime_Robot");
+            robotRoot.transform.SetParent(parent);
+            robotRoot.transform.position = ScaleMapPosition(new Vector3(-4.8f, 1f, 154f));
+            robotRoot.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
+            Rigidbody robotRigidbody = robotRoot.AddComponent<Rigidbody>();
+            robotRigidbody.mass = 1.2f;
+
+            CapsuleCollider robotCollider = robotRoot.AddComponent<CapsuleCollider>();
+            robotCollider.center = new Vector3(0f, 0f, 0f);
+            robotCollider.radius = 0.38f;
+            robotCollider.height = 2f;
+
+            GrabTarget robotGrabTarget = robotRoot.AddComponent<GrabTarget>();
+            SerializedObject serializedGrabTarget = new SerializedObject(robotGrabTarget);
+            serializedGrabTarget.FindProperty("targetRigidbody").objectReferenceValue = robotRigidbody;
+            serializedGrabTarget.FindProperty("canBePulled").boolValue = true;
+            serializedGrabTarget.FindProperty("canPullPlayer").boolValue = false;
+            serializedGrabTarget.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject robotModel = AssetDatabase.LoadAssetAtPath<GameObject>(GrabTargetModelPath);
+            if (robotModel != null)
+            {
+                GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(robotModel);
+                visual.name = "Overtime_Robot_Visual";
+                visual.transform.SetParent(robotRoot.transform);
+                visual.transform.localPosition = new Vector3(0f, -1f, 0f);
+                visual.transform.localRotation = Quaternion.identity;
+                visual.transform.localScale = Vector3.one * 1.15f;
+            }
+
+            GameObject windowTrigger = new GameObject("RobotCheckout_WindowTrigger");
+            windowTrigger.transform.SetParent(parent);
+            windowTrigger.transform.position = ScaleMapPosition(new Vector3(8.2f, 1.5f, 154f));
+
+            BoxCollider triggerCollider = windowTrigger.AddComponent<BoxCollider>();
+            triggerCollider.isTrigger = true;
+            triggerCollider.size = new Vector3(3.5f * LayoutScale, 3f, 7f * LayoutScale);
+
+            RobotCheckoutTrigger checkoutTrigger = windowTrigger.AddComponent<RobotCheckoutTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(checkoutTrigger);
+            serializedTrigger.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedTrigger.FindProperty("robotObjectName").stringValue = "Overtime_Robot";
+            serializedTrigger.FindProperty("completionObjectiveId").stringValue = "checkout_robot";
+            serializedTrigger.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateSecondBatterySwapObjects(Transform parent, MissionManager missionManager)
+        {
+            Type grabTargetType = Type.GetType("GrabTarget, Assembly-CSharp");
+            Type energyCoreType = Type.GetType("EnergyCore, Assembly-CSharp");
+            Type coreStationType = Type.GetType("CoreStation, Assembly-CSharp");
+            if (grabTargetType == null || energyCoreType == null || coreStationType == null)
+            {
+                Debug.LogError("두 번째 배터리 교체 오브젝트를 만들 타입을 찾을 수 없습니다.");
+                return;
+            }
+
+            GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            core.name = "EnergyCore_TrapRoom";
+            core.transform.SetParent(parent);
+            core.transform.position = ScaleMapPosition(new Vector3(-5.2f, 1.1f, 130f));
+            core.transform.localScale = Vector3.one * 1.25f;
+
+            Rigidbody coreRigidbody = core.AddComponent<Rigidbody>();
+            coreRigidbody.mass = 0.75f;
+
+            Component grabTarget = core.AddComponent(grabTargetType);
+            SerializedObject serializedGrabTarget = new SerializedObject(grabTarget);
+            serializedGrabTarget.FindProperty("targetRigidbody").objectReferenceValue = coreRigidbody;
+            serializedGrabTarget.ApplyModifiedPropertiesWithoutUndo();
+
+            Renderer coreRenderer = core.GetComponent<Renderer>();
+            Color coreColor = new Color(0f, 0.7f, 1f);
+            if (coreRenderer != null)
+            {
+                coreRenderer.sharedMaterial = CreateSceneMaterial("TrapRoom_Core_Blue_Material", coreColor);
+            }
+
+            GameObject lightObject = new GameObject("EnergyCore_TrapRoom_BlueLight");
+            lightObject.transform.SetParent(core.transform);
+            lightObject.transform.localPosition = Vector3.zero;
+            Light coreLight = lightObject.AddComponent<Light>();
+            coreLight.type = LightType.Point;
+            coreLight.color = coreColor;
+            coreLight.intensity = 4f;
+            coreLight.range = 4f;
+
+            Component energyCore = core.AddComponent(energyCoreType);
+            SerializedObject serializedCore = new SerializedObject(energyCore);
+            serializedCore.FindProperty("emissionRenderer").objectReferenceValue = coreRenderer;
+            serializedCore.FindProperty("coreLight").objectReferenceValue = coreLight;
+            serializedCore.FindProperty("isActive").boolValue = true;
+            serializedCore.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject station = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            station.name = "CoreStation_TrapRoom";
+            station.transform.SetParent(parent);
+            station.transform.position = ScaleMapPosition(new Vector3(5.2f, 0.15f, 130f));
+            station.transform.localScale = new Vector3(3.6f, 0.35f, 3.6f);
+            station.GetComponent<Renderer>().sharedMaterial = CreateSceneMaterial("TrapRoom_Station_Grey_Material", Color.gray);
+
+            BoxCollider stationCollider = station.GetComponent<BoxCollider>();
+            stationCollider.isTrigger = true;
+            stationCollider.size = new Vector3(1f, 2f, 1f);
+            stationCollider.center = new Vector3(0f, 0.75f, 0f);
+
+            GameObject holdPoint = new GameObject("TrapRoom_StationHoldPoint");
+            holdPoint.transform.SetParent(station.transform);
+            holdPoint.transform.localPosition = new Vector3(0f, 1f, 0f);
+            holdPoint.transform.localRotation = Quaternion.identity;
+
+            CoreStation coreStation = station.AddComponent<CoreStation>();
+            SerializedObject serializedStation = new SerializedObject(coreStation);
+            serializedStation.FindProperty("stationHoldPoint").objectReferenceValue = holdPoint.transform;
+            serializedStation.FindProperty("missionManager").objectReferenceValue = missionManager;
+            serializedStation.FindProperty("chargeTime").floatValue = 3f;
+            serializedStation.FindProperty("completionObjectiveId").stringValue = "swap_battery_02";
+            serializedStation.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         private static GameObject CreateMissionUIRect(Transform parent, string objectName, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 sizeDelta, Vector2 anchoredPosition)
         {
             GameObject uiObject = new GameObject(objectName);
@@ -1470,17 +1759,16 @@ namespace AfterHours.EditorTools
         {
             string[,] data =
             {
-                { "check_in_console", "01 CHECK-IN: 근무 종료 확인", "시작 방 왼쪽 콘솔 앞 목표 패드로 이동하세요. 폐쇄된 시설에 갇혔다는 상황을 확인합니다.", "체크인 콘솔 확인 완료. 다음 방으로 이동하세요." },
-                { "reach_grab_practice", "02 GRAB TEST: 타겟 확인", "노란 방 오른쪽의 목표 패드까지 이동하세요. 앞의 캐릭터 타겟에 Grab Pack 손을 발사해 봅니다.", "Grab Pack 테스트 지점을 확인했습니다." },
-                { "reach_storage", "03 STORAGE: 보관함 확인", "주황색 보관실 왼쪽 컨테이너 앞의 목표 패드까지 이동하세요.", "보관함 확인 완료." },
-                { "reach_anchor_room", "04 ANCHOR: 출구까지 끌려가기", "초록색 방의 고정 기둥을 잡고 방 앞쪽 목표 패드까지 이동하세요.", "앵커 이동 구간을 통과했습니다." },
-                { "reach_core_lab", "05 CORE: Energy Core 위치 확인", "파란 방 왼쪽의 Energy Core 옆 목표 패드까지 이동하세요.", "Energy Core 위치를 확인했습니다." },
-                { "charge_core", "Energy Core를 Core Station에 올리기", "Grab Pack으로 파란 Energy Core를 끌어 회색 Core Station 위에 올리세요.", "충전 완료. 다음 보안문이 열렸습니다." },
-                { "reach_security", "06 SECURITY: 경보 콘솔 확인", "열린 보안문을 지나 붉은 방 왼쪽 경보 콘솔 앞 목표 패드로 이동하세요.", "경보 콘솔 확인 완료." },
-                { "reach_puzzle", "07 PUZZLE: 출구 패드 도착", "분홍색 방의 좌우 앵커를 이용해 앞쪽 출구 목표 패드까지 이동하세요.", "퍼즐 방 출구에 도착했습니다." },
-                { "reach_airlock", "08 AIRLOCK: 콘솔 확인", "청록색 방 오른쪽 목표 패드로 이동해 Airlock 콘솔을 확인하세요.", "Airlock 콘솔 확인 완료." },
-                { "reach_decon", "09 DECON: 오염 제거 링 통과", "녹색 방 왼쪽 파이프 링 아래 목표 패드까지 이동하세요.", "오염 제거 링 통과 완료." },
-                { "reach_escape", "10 ESCAPE: 최종 문 도착", "밝은 마지막 방의 큰 출구 문 앞 목표 패드까지 이동하세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
+                { "check_in_console", "01 퇴근 점검 시작", "컴퓨터 앞 목표 패드로 이동해 오늘의 퇴근 점검을 시작하세요.", "퇴근 점검 시작 확인 완료." },
+                { "check_storage", "02 스토리지 확인", "왼쪽 점프 구간을 지나 스토리지 컨테이너 앞 목표 패드까지 이동하세요.", "스토리지 확인 완료." },
+                { "test_grab_gear", "03 그랩 장비 획득", "Grab Pack 장비 구역에서 좌클릭/우클릭으로 앞의 테스트 오브젝트를 잡아보세요.", "그랩 장비 점검 완료." },
+                { "use_anchor", "04 앵커 사용", "점프로 넘을 수 없는 구역의 앵커를 잡고 출구 목표 패드까지 이동하세요.", "앵커 이동 점검 완료." },
+                { "swap_battery_01", "05 전력 낮은 방 배터리 교체", "회색 방전 코어 대신 푸른 Energy Core를 Core Station에 넣어 방 전력을 복구하세요.", "첫 번째 배터리 교체 완료." },
+                { "pass_warning_lights", "06 신호등 방 통과", "점검등이 꺼지는 타이밍에만 붉은 점검등 구역을 통과하세요.", "신호등 방 통과 완료." },
+                { "swap_battery_02", "07 배터리 교체 2", "한 손은 코어, 한 손은 앵커를 쓰는 느낌으로 함정을 피해 두 번째 Core Station에 코어를 넣으세요.", "두 번째 배터리 교체 완료." },
+                { "checkout_robot", "08 직원 퇴근 시키기", "퇴근하지 않은 로봇을 Grab Pack으로 잡아 창문 밖 처리 구역으로 보내세요.", "로봇 퇴근 처리 완료." },
+                { "clear_final_mix", "09 종합 점검 방", "라이트, 점프, 그랩을 섞어 최종 점검 방의 출구 목표 패드까지 이동하세요.", "종합 점검 통과." },
+                { "clock_out", "10 퇴근 완료", "마지막 기계 앞 목표 패드에서 점검완을 찍고 퇴근하세요.", "점검완. 퇴근 완료!" }
             };
 
             missionSteps.arraySize = data.GetLength(0);

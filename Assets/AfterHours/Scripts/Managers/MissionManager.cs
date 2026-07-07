@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class MissionManager : MonoBehaviour
 {
+    public event Action<string> MissionCompleted;
+
     [Serializable]
     private class MissionStep
     {
@@ -56,6 +58,7 @@ public class MissionManager : MonoBehaviour
             return;
         }
 
+        MissionCompleted?.Invoke(objectiveId);
         advanceRoutine = StartCoroutine(AdvanceMissionRoutine(currentMission));
     }
 
@@ -83,7 +86,7 @@ public class MissionManager : MonoBehaviour
 
         if (missionSteps == null || currentMissionIndex >= missionSteps.Length)
         {
-            uiManager.ShowObjective("탈출 준비 완료", "모든 목표를 완료했습니다. Airlock을 지나 탈출하세요.");
+            uiManager.ShowObjective("퇴근 준비 완료", "모든 퇴근 점검을 완료했습니다. 마지막 기계에 점검완을 찍고 퇴근하세요.");
             return;
         }
 
