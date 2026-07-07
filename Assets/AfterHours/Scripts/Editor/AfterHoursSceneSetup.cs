@@ -277,6 +277,9 @@ namespace AfterHours.EditorTools
             PlaceMapModel(mapRoot.transform, "pipe.fbx", "SecurityCorridor_CeilingPipe_B", new Vector3(2.6f, 3.1f, 58f), new Vector3(0f, 0f, 90f), Vector3.one * 2.5f);
             PlaceMapModel(mapRoot.transform, "wall-switch.fbx", "ExitWallSwitch_Deco", new Vector3(-2f, 1f, 85.7f), Vector3.zero, Vector3.one * 1.5f);
 
+            // 각 방의 역할이 한눈에 보이도록 색상, 조명, 소품 밀도를 다르게 둡니다.
+            CreateDistinctLevelZones(mapRoot.transform);
+
             // GrabPack 이동 퍼즐용 앵커 기둥입니다. 2초 이상 잡고 있으면 플레이어가 기둥 쪽으로 끌려갑니다.
             CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Training_Left", new Vector3(-3.5f, 1.8f, -0.5f));
             CreateGrabAnchorPillar(mapRoot.transform, "GrabAnchor_Training_Right", new Vector3(3.5f, 1.8f, 3.5f));
@@ -507,6 +510,135 @@ namespace AfterHours.EditorTools
             serializedGrabTarget.FindProperty("canBePulled").boolValue = false;
             serializedGrabTarget.FindProperty("canPullPlayer").boolValue = true;
             serializedGrabTarget.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateDistinctLevelZones(Transform parent)
+        {
+            // 01 시작 구역: 체크인 콘솔과 차가운 색 라이트로 안전한 출발 지점을 표시합니다.
+            CreateZoneIdentity(parent, "Zone01_Start", "01 START", new Vector3(0f, 0f, -12f), 18f, 10f, new Color(0.3f, 0.85f, 1f));
+            PlaceMapModel(parent, "computer-system.fbx", "Zone01_Start_CheckInConsole", new Vector3(4.5f, 0f, -15f), new Vector3(0f, -90f, 0f), Vector3.one * 1.4f);
+            PlaceMapModel(parent, "chair.fbx", "Zone01_Start_OperatorChair", new Vector3(2.5f, 0f, -15f), new Vector3(0f, 90f, 0f), Vector3.one * 1.2f);
+
+            // 02 훈련 구역: 넓고 밝은 노란색으로 Grab Pack 기본 조작 공간임을 드러냅니다.
+            CreateZoneIdentity(parent, "Zone02_Training", "02 TRAINING", new Vector3(0f, 0f, 1f), 22f, 16f, new Color(1f, 0.85f, 0.18f));
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Zone02_Training_PracticeBarrier_A", new Vector3(-5f, 0f, -1.5f), new Vector3(0f, 90f, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(parent, "structure-barrier-high.fbx", "Zone02_Training_PracticeBarrier_B", new Vector3(5f, 0f, 3f), new Vector3(0f, -90f, 0f), Vector3.one * 1.6f);
+
+            // 03 보관실: 주황색과 컨테이너를 많이 배치해 자원 보관 공간처럼 보이게 합니다.
+            CreateZoneIdentity(parent, "Zone03_Storage", "03 STORAGE", new Vector3(-18f, 0f, 2f), 10f, 10f, new Color(1f, 0.45f, 0.12f));
+            PlaceMapModel(parent, "container-wide.fbx", "Zone03_Storage_CrateWall_A", new Vector3(-20.5f, 0f, 0f), new Vector3(0f, 90f, 0f), Vector3.one * 1.7f);
+            PlaceMapModel(parent, "container-tall.fbx", "Zone03_Storage_CrateWall_B", new Vector3(-20.5f, 0f, 4f), new Vector3(0f, 90f, 0f), Vector3.one * 1.5f);
+            PlaceMapModel(parent, "container-flat-open.fbx", "Zone03_Storage_OpenCrate", new Vector3(-15.5f, 0f, 3f), new Vector3(0f, -30f, 0f), Vector3.one * 1.35f);
+
+            // 04 정비실: 초록색과 파이프/스위치로 설비 관리 구역을 구분합니다.
+            CreateZoneIdentity(parent, "Zone04_Maintenance", "04 MAINT", new Vector3(-13f, 0f, 22f), 17f, 10f, new Color(0.25f, 1f, 0.45f));
+            PlaceMapModel(parent, "pipe-bend.fbx", "Zone04_Maintenance_PipeBend_A", new Vector3(-16f, 1.5f, 20f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
+            PlaceMapModel(parent, "pipe-ring-colored.fbx", "Zone04_Maintenance_PipeRing_A", new Vector3(-10f, 1.5f, 24f), new Vector3(0f, 0f, 90f), Vector3.one * 2f);
+            PlaceMapModel(parent, "wall-switch.fbx", "Zone04_Maintenance_SwitchBank", new Vector3(-6.5f, 1f, 26.5f), Vector3.zero, Vector3.one * 1.4f);
+
+            // 05 중앙 복도: 좁은 흰색 라인으로 다음 주요 실험실까지 압박감을 만듭니다.
+            CreateZoneIdentity(parent, "Zone05_ServiceCorridor", "05 SERVICE", new Vector3(0f, 0f, 20f), 7f, 22f, new Color(0.85f, 0.9f, 1f));
+
+            // 06 코어 연구실: 파란색 조명과 디스플레이를 집중 배치해 핵심 퍼즐 방으로 보이게 합니다.
+            CreateZoneIdentity(parent, "Zone06_CoreLab", "06 CORE LAB", new Vector3(0f, 0f, 40f), 26f, 18f, new Color(0.1f, 0.45f, 1f));
+            PlaceMapModel(parent, "table-display-planet.fbx", "Zone06_CoreLab_CoreDisplay_A", new Vector3(0f, 0f, 38f), Vector3.zero, Vector3.one * 1.7f);
+            PlaceMapModel(parent, "display-wall.fbx", "Zone06_CoreLab_DisplayWall_A", new Vector3(10f, 1f, 34f), new Vector3(0f, -90f, 0f), Vector3.one * 1.7f);
+            PlaceMapModel(parent, "computer-screen.fbx", "Zone06_CoreLab_Screen_A", new Vector3(-8f, 0.5f, 45f), new Vector3(0f, 35f, 0f), Vector3.one * 1.5f);
+
+            // 07 실험실: 보라색과 책상형 구조물로 작은 보조 연구실처럼 구분합니다.
+            CreateZoneIdentity(parent, "Zone07_Lab", "07 LAB", new Vector3(20f, 0f, 40f), 10f, 10f, new Color(0.75f, 0.35f, 1f));
+            PlaceMapModel(parent, "table-large.fbx", "Zone07_Lab_WorkTable", new Vector3(20f, 0f, 39f), new Vector3(0f, 90f, 0f), Vector3.one * 1.4f);
+            PlaceMapModel(parent, "computer-wide.fbx", "Zone07_Lab_ComputerBank", new Vector3(23f, 0f, 43f), new Vector3(0f, -90f, 0f), Vector3.one * 1.25f);
+
+            // 08 보안실: 붉은 색상과 폐쇄된 느낌의 게이트로 위험 구역임을 보여줍니다.
+            CreateZoneIdentity(parent, "Zone08_Security", "08 SECURITY", new Vector3(10f, 0f, 56f), 10f, 10f, new Color(1f, 0.16f, 0.08f));
+            PlaceMapModel(parent, "door-double-closed.fbx", "Zone08_Security_LockedDoorProp", new Vector3(6.5f, 0f, 60f), new Vector3(0f, 90f, 0f), Vector3.one * 1.5f);
+            PlaceMapModel(parent, "display-wall-wide.fbx", "Zone08_Security_AlertDisplay", new Vector3(13f, 1f, 56f), new Vector3(0f, -90f, 0f), Vector3.one * 1.6f);
+
+            // 09 최종 홀: 넓은 붉은 오렌지 구역으로 최종 퍼즐 전 긴장감을 만듭니다.
+            CreateZoneIdentity(parent, "Zone09_FinalHall", "09 FINAL", new Vector3(0f, 0f, 76f), 30f, 22f, new Color(1f, 0.32f, 0.05f));
+            PlaceMapModel(parent, "wall-banner.fbx", "Zone09_FinalHall_Banner_Left", new Vector3(-12.5f, 1.2f, 76f), new Vector3(0f, 90f, 0f), Vector3.one * 1.8f);
+            PlaceMapModel(parent, "wall-banner.fbx", "Zone09_FinalHall_Banner_Right", new Vector3(12.5f, 1.2f, 76f), new Vector3(0f, -90f, 0f), Vector3.one * 1.8f);
+
+            // 10 퍼즐실: 분홍색 테두리와 촘촘한 구조물로 최종 조합 퍼즐 방을 표시합니다.
+            CreateZoneIdentity(parent, "Zone10_Puzzle", "10 PUZZLE", new Vector3(-22f, 0f, 75f), 10f, 13f, new Color(1f, 0.25f, 0.65f));
+            PlaceMapModel(parent, "structure-panel.fbx", "Zone10_Puzzle_Panel_A", new Vector3(-23.5f, 0f, 72f), new Vector3(0f, 90f, 0f), Vector3.one * 1.6f);
+            PlaceMapModel(parent, "structure-panel.fbx", "Zone10_Puzzle_Panel_B", new Vector3(-20.5f, 0f, 79f), new Vector3(0f, -90f, 0f), Vector3.one * 1.6f);
+
+            // 11 에어락/오염 제거/탈출 베이: 청록색, 녹색, 밝은 흰색으로 후반 3단계를 구분합니다.
+            CreateZoneIdentity(parent, "Zone11_Airlock", "11 AIRLOCK", new Vector3(0f, 0f, 92f), 22f, 10f, new Color(0.1f, 0.95f, 1f));
+            CreateZoneIdentity(parent, "Zone12_Decontamination", "12 DECON", new Vector3(0f, 0f, 102f), 22f, 10f, new Color(0.1f, 1f, 0.55f));
+            CreateZoneIdentity(parent, "Zone13_EscapeBay", "13 ESCAPE", new Vector3(0f, 0f, 114f), 30f, 14f, new Color(0.95f, 0.98f, 1f));
+            PlaceMapModel(parent, "door-double.fbx", "Zone13_EscapeBay_FinalDoorProp", new Vector3(0f, 0f, 120f), Vector3.zero, Vector3.one * 1.8f);
+        }
+
+        private static void CreateZoneIdentity(Transform parent, string zoneName, string labelText, Vector3 center, float width, float depth, Color color)
+        {
+            CreateZoneBorder(parent, $"{zoneName}_FloorBorder", center, width, depth, color);
+            CreateAccentBox(parent, $"{zoneName}_CeilingLightBar", center + new Vector3(0f, CeilingHeight - 0.25f, 0f), new Vector3(width * 0.65f, 0.12f, 0.45f), color);
+            CreateAccentBox(parent, $"{zoneName}_EntryColorBand", center + new Vector3(0f, 2.35f, -depth * 0.5f + 0.35f), new Vector3(width * 0.5f, 0.22f, 0.16f), color);
+            CreateZoneLabel(parent, $"{zoneName}_Label", labelText, center + new Vector3(-width * 0.32f, 2.6f, -depth * 0.5f + 0.45f), color);
+            CreatePointLight(parent, $"{zoneName}_AccentLight", center + new Vector3(0f, CeilingHeight - 1.4f, 0f), color, Mathf.Max(width, depth) * 0.65f);
+        }
+
+        private static void CreateZoneBorder(Transform parent, string objectName, Vector3 center, float width, float depth, Color color)
+        {
+            float y = 0.04f;
+            float thickness = 0.12f;
+            CreateAccentBox(parent, $"{objectName}_Back", center + new Vector3(0f, y, -depth * 0.5f), new Vector3(width, thickness, 0.16f), color);
+            CreateAccentBox(parent, $"{objectName}_Front", center + new Vector3(0f, y, depth * 0.5f), new Vector3(width, thickness, 0.16f), color);
+            CreateAccentBox(parent, $"{objectName}_Left", center + new Vector3(-width * 0.5f, y, 0f), new Vector3(0.16f, thickness, depth), color);
+            CreateAccentBox(parent, $"{objectName}_Right", center + new Vector3(width * 0.5f, y, 0f), new Vector3(0.16f, thickness, depth), color);
+        }
+
+        private static void CreateAccentBox(Transform parent, string objectName, Vector3 position, Vector3 size, Color color)
+        {
+            GameObject accent = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            accent.name = objectName;
+            accent.transform.SetParent(parent);
+            accent.transform.position = ScaleMapPosition(position);
+            accent.transform.localScale = new Vector3(size.x * LayoutScale, size.y, size.z * LayoutScale);
+
+            Renderer renderer = accent.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Material", color);
+            }
+
+            Collider collider = accent.GetComponent<Collider>();
+            if (collider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(collider);
+            }
+        }
+
+        private static void CreateZoneLabel(Transform parent, string objectName, string text, Vector3 position, Color color)
+        {
+            GameObject label = new GameObject(objectName);
+            label.transform.SetParent(parent);
+            label.transform.position = ScaleMapPosition(position);
+            label.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            label.transform.localScale = Vector3.one * 0.35f;
+
+            TextMesh textMesh = label.AddComponent<TextMesh>();
+            textMesh.text = text;
+            textMesh.color = color;
+            textMesh.characterSize = 1f;
+            textMesh.anchor = TextAnchor.MiddleLeft;
+            textMesh.alignment = TextAlignment.Left;
+        }
+
+        private static void CreatePointLight(Transform parent, string objectName, Vector3 position, Color color, float range)
+        {
+            GameObject lightObject = new GameObject(objectName);
+            lightObject.transform.SetParent(parent);
+            lightObject.transform.position = ScaleMapPosition(position);
+
+            Light light = lightObject.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = color;
+            light.intensity = 1.4f;
+            light.range = Mathf.Max(6f, range * LayoutScale);
         }
 
         private static void CreateHighWallRun(Transform parent, float fixedXOrStartX, float startZOrFixedZ, float endZOrEndX, bool vertical, int count, string prefix)
