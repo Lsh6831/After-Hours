@@ -363,6 +363,7 @@ namespace AfterHours.EditorTools
 
             PlaceCompactRoomProps(mapRoot);
             PlaceCompactDoorSequence(mapRoot);
+            PlaceCompactObjectivePads(mapRoot);
 
             // GrabPack 이동 퍼즐용 앵커입니다. 움직일 수 없는 기둥이라 플레이어가 끌려갑니다.
             CreateGrabAnchorPillar(mapRoot, "GrabAnchor_Practice_Left", new Vector3(-2.8f, 1.8f, -8f));
@@ -446,6 +447,41 @@ namespace AfterHours.EditorTools
             CreateDoorPanel(parent, "Door_07_To_08_Normal", new Vector3(0f, 1.6f, 25f), new Color(0.32f, 0.16f, 0.38f), false);
             CreateDoorPanel(parent, "Door_08_To_09_Normal", new Vector3(0f, 1.6f, 31f), new Color(0.08f, 0.38f, 0.42f), false);
             CreateDoorPanel(parent, "Door_09_To_10_Normal", new Vector3(0f, 1.6f, 37f), new Color(0.08f, 0.42f, 0.25f), false);
+        }
+
+        private static void PlaceCompactObjectivePads(Transform parent)
+        {
+            // 방 입구가 아니라 실제 목표 지점에 작은 발광 패드를 둡니다.
+            CreateObjectivePad(parent, "ObjectivePad_GrabTarget", new Vector3(2.2f, 0.08f, -8.2f), new Color(1f, 0.82f, 0.18f));
+            CreateObjectivePad(parent, "ObjectivePad_StorageCrate", new Vector3(-3.1f, 0.08f, -1.6f), new Color(1f, 0.48f, 0.12f));
+            CreateObjectivePad(parent, "ObjectivePad_AnchorExit", new Vector3(0f, 0.08f, 6.1f), new Color(0.25f, 1f, 0.45f));
+            CreateObjectivePad(parent, "ObjectivePad_CorePickup", new Vector3(-2.4f, 0.08f, 10f), new Color(0.12f, 0.48f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_SecurityConsole", new Vector3(-3.2f, 0.08f, 16f), new Color(1f, 0.16f, 0.08f));
+            CreateObjectivePad(parent, "ObjectivePad_PuzzleExit", new Vector3(0f, 0.08f, 24.8f), new Color(1f, 0.25f, 0.65f));
+            CreateObjectivePad(parent, "ObjectivePad_AirlockConsole", new Vector3(2.8f, 0.08f, 28f), new Color(0.1f, 0.95f, 1f));
+            CreateObjectivePad(parent, "ObjectivePad_DeconRing", new Vector3(-3.1f, 0.08f, 34f), new Color(0.1f, 1f, 0.55f));
+            CreateObjectivePad(parent, "ObjectivePad_EscapeDoor", new Vector3(0f, 0.08f, 41.6f), new Color(0.96f, 0.98f, 1f));
+        }
+
+        private static void CreateObjectivePad(Transform parent, string objectName, Vector3 position, Color color)
+        {
+            GameObject pad = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pad.name = objectName;
+            pad.transform.SetParent(parent);
+            pad.transform.position = ScaleMapPosition(position);
+            pad.transform.localScale = new Vector3(1.25f, 0.04f, 1.25f);
+
+            Renderer renderer = pad.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = CreateSceneMaterial($"{objectName}_Material", color);
+            }
+
+            Collider collider = pad.GetComponent<Collider>();
+            if (collider != null)
+            {
+                UnityEngine.Object.DestroyImmediate(collider);
+            }
         }
 
         private static GameObject CreateDoorPanel(Transform parent, string objectName, Vector3 position, Color color, bool addCollider)
@@ -1238,15 +1274,15 @@ namespace AfterHours.EditorTools
             ConfigureMissionSteps(serializedMission.FindProperty("missionSteps"));
             serializedMission.ApplyModifiedPropertiesWithoutUndo();
 
-            CreateMissionTrigger("MissionTrigger_ReachGrabPractice", "reach_grab_practice", missionManager, new Vector3(0f, 1.5f, -8f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachStorage", "reach_storage", missionManager, new Vector3(0f, 1.5f, -2f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachAnchorRoom", "reach_anchor_room", missionManager, new Vector3(0f, 1.5f, 4f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachCoreLab", "reach_core_lab", missionManager, new Vector3(0f, 1.5f, 10f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachSecurity", "reach_security", missionManager, new Vector3(0f, 1.5f, 16f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachPuzzle", "reach_puzzle", missionManager, new Vector3(0f, 1.5f, 22f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachAirlock", "reach_airlock", missionManager, new Vector3(0f, 1.5f, 28f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachDecon", "reach_decon", missionManager, new Vector3(0f, 1.5f, 34f), new Vector3(10f, 3f, 6f));
-            CreateMissionTrigger("MissionTrigger_ReachEscape", "reach_escape", missionManager, new Vector3(0f, 1.5f, 40f), new Vector3(10f, 3f, 6f));
+            CreateMissionTrigger("MissionTrigger_GrabTargetPad", "reach_grab_practice", missionManager, new Vector3(2.2f, 1.2f, -8.2f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_StorageCratePad", "reach_storage", missionManager, new Vector3(-3.1f, 1.2f, -1.6f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_AnchorExitPad", "reach_anchor_room", missionManager, new Vector3(0f, 1.2f, 6.1f), new Vector3(2.4f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_CorePickupPad", "reach_core_lab", missionManager, new Vector3(-2.4f, 1.2f, 10f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_SecurityConsolePad", "reach_security", missionManager, new Vector3(-3.2f, 1.2f, 16f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_PuzzleExitPad", "reach_puzzle", missionManager, new Vector3(0f, 1.2f, 24.8f), new Vector3(2.4f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_AirlockConsolePad", "reach_airlock", missionManager, new Vector3(2.8f, 1.2f, 28f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_DeconRingPad", "reach_decon", missionManager, new Vector3(-3.1f, 1.2f, 34f), new Vector3(2.2f, 2.4f, 2.2f));
+            CreateMissionTrigger("MissionTrigger_EscapeDoorPad", "reach_escape", missionManager, new Vector3(0f, 1.2f, 41.6f), new Vector3(2.6f, 2.4f, 2.2f));
 
             GameObject coreStation = GameObject.Find("CoreStation_Test");
             CoreStation station = coreStation != null ? coreStation.GetComponent<CoreStation>() : null;
@@ -1298,16 +1334,16 @@ namespace AfterHours.EditorTools
         {
             string[,] data =
             {
-                { "reach_grab_practice", "02 GRAB TEST로 이동", "앞쪽 작은 방으로 들어가세요. 노란 방에서 좌클릭/우클릭으로 Grab Pack 손을 발사해 봅니다.", "Grab Pack 테스트 방에 도착했습니다." },
-                { "reach_storage", "03 STORAGE 통과", "다음 주황색 보관실로 이동하세요. 좁은 방과 문 프레임을 따라 진행합니다.", "보관실을 통과했습니다." },
-                { "reach_anchor_room", "04 ANCHOR에서 끌려가기 테스트", "초록색 방의 고정 기둥을 2초 이상 잡아 플레이어가 끌려가는지 확인하세요.", "앵커 방에 도착했습니다." },
-                { "reach_core_lab", "05 CORE에서 Energy Core 찾기", "파란 코어 방으로 이동하세요. 파란 공이 Energy Core, 회색 판이 Core Station입니다.", "코어 방에 도착했습니다." },
+                { "reach_grab_practice", "02 GRAB TEST: 타겟 확인", "노란 방 오른쪽의 목표 패드까지 이동하세요. 앞의 캐릭터 타겟에 Grab Pack 손을 발사해 봅니다.", "Grab Pack 테스트 지점을 확인했습니다." },
+                { "reach_storage", "03 STORAGE: 보관함 확인", "주황색 보관실 왼쪽 컨테이너 앞의 목표 패드까지 이동하세요.", "보관함 확인 완료." },
+                { "reach_anchor_room", "04 ANCHOR: 출구까지 끌려가기", "초록색 방의 고정 기둥을 잡고 방 앞쪽 목표 패드까지 이동하세요.", "앵커 이동 구간을 통과했습니다." },
+                { "reach_core_lab", "05 CORE: Energy Core 위치 확인", "파란 방 왼쪽의 Energy Core 옆 목표 패드까지 이동하세요.", "Energy Core 위치를 확인했습니다." },
                 { "charge_core", "Energy Core를 Core Station에 올리기", "Grab Pack으로 파란 Energy Core를 끌어 회색 Core Station 위에 올리세요.", "충전 완료. 다음 보안문이 열렸습니다." },
-                { "reach_security", "06 SECURITY 통과", "열린 파란 보안문을 지나 붉은 방으로 들어가세요. 다음 방 입구의 앵커를 잡으면 이동이 쉬워집니다.", "보안 방을 통과했습니다." },
-                { "reach_puzzle", "07 PUZZLE에서 앵커 연결", "분홍색 방의 좌우 앵커를 번갈아 잡아 다음 문 방향으로 이동하세요.", "퍼즐 방을 통과했습니다." },
-                { "reach_airlock", "08 AIRLOCK 문 통과", "청록색 에어락의 열린 일반문 사이를 지나 다음 방으로 이동하세요.", "Airlock에 진입했습니다." },
-                { "reach_decon", "09 DECON 오염 제거실 통과", "녹색 방의 파이프 링을 지나 마지막 탈출문 방향으로 이동하세요.", "오염 제거 방을 통과했습니다." },
-                { "reach_escape", "10 ESCAPE 탈출 지점 도착", "밝은 마지막 방의 큰 출구 문 앞까지 이동하세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
+                { "reach_security", "06 SECURITY: 경보 콘솔 확인", "열린 보안문을 지나 붉은 방 왼쪽 경보 콘솔 앞 목표 패드로 이동하세요.", "경보 콘솔 확인 완료." },
+                { "reach_puzzle", "07 PUZZLE: 출구 패드 도착", "분홍색 방의 좌우 앵커를 이용해 앞쪽 출구 목표 패드까지 이동하세요.", "퍼즐 방 출구에 도착했습니다." },
+                { "reach_airlock", "08 AIRLOCK: 콘솔 확인", "청록색 방 오른쪽 목표 패드로 이동해 Airlock 콘솔을 확인하세요.", "Airlock 콘솔 확인 완료." },
+                { "reach_decon", "09 DECON: 오염 제거 링 통과", "녹색 방 왼쪽 파이프 링 아래 목표 패드까지 이동하세요.", "오염 제거 링 통과 완료." },
+                { "reach_escape", "10 ESCAPE: 최종 문 도착", "밝은 마지막 방의 큰 출구 문 앞 목표 패드까지 이동하세요.", "Escape Bay에 도착했습니다. 탈출 성공!" }
             };
 
             missionSteps.arraySize = data.GetLength(0);
